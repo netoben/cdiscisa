@@ -170,10 +170,7 @@ public class Cdiscisa {
                 return;
             }                       
         } 
-        
-        String registroPDF = "";
-        InputStream lista_auto_pdf = null;
-        
+
         String nameRegistro = "";
         
         if (args[15].isEmpty()){
@@ -181,24 +178,10 @@ public class Cdiscisa {
         } else {        
             nameRegistro = args[15];
         }
-        /*
-        try{
-            registroPDF = 
-           // registroPDF = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream(nameRegistro);
-        } catch (Exception ex){
-            JOptionPane.showMessageDialog(null, "Error al cargar el registro default Jorge Razon 2015. \nnameRegistro: " + nameRegistro +  "\nfile: " + String.valueOf(registroPDF) +  "\n" + ex.toString());
-            return;
-        }
-        */
+
         if (args[16].isEmpty()){
             JOptionPane.showMessageDialog(null, "Es necesario proporcionar la lista autógrafa de este curso.");
             return;
-        } else {
-            //try{
-            /*    lista_auto_pdf = new FileInputStream(new File(args[16]));
-            } catch (Exception ex){
-                JOptionPane.showMessageDialog(null, "Error al cargar la lista autógrafa de este curso. \nargs[15]: " + args[15] +  "\nlista_auto_pdf: " + String.valueOf(lista_auto_pdf) +  "\n" + ex.toString());
-            }*/
         }
         
         ArrayList <Directorio> listaDirectorio = null;
@@ -250,38 +233,79 @@ public class Cdiscisa {
         Curso c = new Curso();
         
         if (!(wbListaSheet.getRow(2) == null || wbListaSheet.getRow(2).getCell(4) == null || wbListaSheet.getRow(2).getCell(4).getStringCellValue().isEmpty()) ){
-            c.nombre_empresa = wbListaSheet.getRow(2).getCell(4).getStringCellValue();
+            try {
+                c.nombre_empresa = wbListaSheet.getRow(2).getCell(4).getStringCellValue();
+            } catch (Exception ex){
+                JOptionPane.showMessageDialog(null, "El nombre de la empresa en la Lista de Participantes parece tener datos no válidos"); 
+                throw new netoCustomException("Error al leer los datos del curso");
+            }
+            
         }
         
         if (!(wbListaSheet.getRow(4) == null || wbListaSheet.getRow(4).getCell(4) == null || wbListaSheet.getRow(4).getCell(4).getStringCellValue().isEmpty()) ) {
-            c.nombre_curso = wbListaSheet.getRow(4).getCell(4).getStringCellValue();
+            try{
+                c.nombre_curso = wbListaSheet.getRow(4).getCell(4).getStringCellValue();
+            } catch (Exception ex){
+                JOptionPane.showMessageDialog(null, "El nombre de el curso Lista de Participantes parece tener datos no válidos"); 
+                throw new netoCustomException("Error al leer los datos del curso");
+            }
         }
         
         if (!(wbListaSheet.getRow(6) == null || wbListaSheet.getRow(6).getCell(4) == null || wbListaSheet.getRow(6).getCell(4).getStringCellValue().isEmpty()) ){
-            c.nombre_instructor = wbListaSheet.getRow(6).getCell(4).getStringCellValue();
+            try{
+                c.nombre_instructor = wbListaSheet.getRow(6).getCell(4).getStringCellValue();
+            }catch (Exception ex){
+                JOptionPane.showMessageDialog(null, "El nombre de el instructor Lista de Participantes parece tener datos no válidos"); 
+                throw new netoCustomException("Error al leer los datos del curso");
+            }
         }
         
         if (!(wbListaSheet.getRow(8) == null || wbListaSheet.getRow(8).getCell(4) == null || wbListaSheet.getRow(8).getCell(4).getStringCellValue().isEmpty())  ){
-            c.horas_texto = wbListaSheet.getRow(8).getCell(4).getStringCellValue();
+            try{
+                c.horas_texto = wbListaSheet.getRow(8).getCell(4).getStringCellValue();
+            }catch (Exception ex){
+                JOptionPane.showMessageDialog(null, "La casilla de Horas en la Lista de Participantes parece tener datos no válidos"); 
+                throw new netoCustomException("Error al leer los datos del curso");
+            }
         }
         
         if (!(wbListaSheet.getRow(11) == null || wbListaSheet.getRow(11).getCell(4) == null || wbListaSheet.getRow(11).getCell(4).getStringCellValue().isEmpty())  ){
-            c.razon_social = wbListaSheet.getRow(11).getCell(4).getStringCellValue();            
+            try{
+                c.razon_social = wbListaSheet.getRow(11).getCell(4).getStringCellValue();
+            }catch (Exception ex){
+                JOptionPane.showMessageDialog(null, "La casilla de Razón Social de la empresa en la Lista de Participantes parece tener datos no válidos"); 
+                throw new netoCustomException("Error al leer los datos del curso");
+            }         
         }
         
         if (!(wbListaSheet.getRow(13) == null || wbListaSheet.getRow(13).getCell(4) == null || wbListaSheet.getRow(13).getCell(4).getStringCellValue().isEmpty())  ){
-            c.rfc_empresa = wbListaSheet.getRow(13).getCell(4).getStringCellValue();            
+            try{
+                c.rfc_empresa = wbListaSheet.getRow(13).getCell(4).getStringCellValue();
+            }catch (Exception ex){
+                JOptionPane.showMessageDialog(null, "La casill de RFC de la empresa en Lista de Participantes parece tener datos no válidos"); 
+                throw new netoCustomException("Error al leer los datos del curso");
+            }         
         } else {        
             JOptionPane.showMessageDialog(null, "El RFC de la empresa no puede estar vacio"); 
             throw new netoCustomException("Error al leer los datos del curso");
         }
         
         if (!(wbListaSheet.getRow(15) == null || wbListaSheet.getRow(15).getCell(4) == null || wbListaSheet.getRow(15).getCell(4).getStringCellValue().isEmpty())  ){
-            c.fecha_certificado = wbListaSheet.getRow(15).getCell(4).getStringCellValue();            
+           try{
+               c.fecha_certificado = wbListaSheet.getRow(15).getCell(4).getStringCellValue();
+           }catch (Exception ex){
+                JOptionPane.showMessageDialog(null, "La casilla de la fecha de certificado de la empresa en la Lista de Participantes parece tener datos no válidos"); 
+                throw new netoCustomException("Error al leer los datos del curso");
+            }               
         }
         
         if (!(wbListaSheet.getRow(17) == null || wbListaSheet.getRow(17).getCell(4) == null || wbListaSheet.getRow(17).getCell(4).getStringCellValue().isEmpty())  ){
-            c.fecha_texto_diploma = wbListaSheet.getRow(17).getCell(4).getStringCellValue();            
+            try{
+                c.fecha_texto_diploma = wbListaSheet.getRow(17).getCell(4).getStringCellValue();
+            }catch (Exception ex){
+                JOptionPane.showMessageDialog(null, "La casilla de la fecha para diploma de la empresa en la Lista de Participantes parece tener datos no válidos"); 
+                throw new netoCustomException("Error al leer los datos del curso");
+            }               
         }
         
         if (!unidadCapacitadora.isEmpty()) {
@@ -423,7 +447,7 @@ public class Cdiscisa {
         return listaParticipantes;
  // method body
 }
-    private static ArrayList <Directorio> llenarDirectorio (Workbook wbDirectorio) throws Exception{
+    private static ArrayList <Directorio> llenarDirectorio (Workbook wbDirectorio) throws netoCustomException, Exception{
         ArrayList <Directorio> listaDirectorio = new ArrayList <>();
         Sheet wbListaSheet = wbDirectorio.getSheetAt(0);
         Iterator<Row> rowIterator = wbListaSheet.iterator();
@@ -439,6 +463,7 @@ public class Cdiscisa {
         
             row = rowIterator.next();
             
+            try{
             if (row.getCell(0) == null || row.getCell(0).toString().isEmpty() )
             {break;}
             
@@ -449,8 +474,7 @@ public class Cdiscisa {
                 d.determinante = row.getCell(0).getStringCellValue().trim();
             }
             
-            if (row.getCell(1) != null){  
-                int x = row.getCell(1).getCellType();
+            if (row.getCell(1) != null){                 
                 d.formato= row.getCell(1).getStringCellValue().trim();
             }
             
@@ -466,7 +490,9 @@ public class Cdiscisa {
             if (row.getCell(4) != null){                     
                 d.direccion = row.getCell(5).getStringCellValue().trim();
             }
-            
+            }catch(Exception ex){
+                JOptionPane.showMessageDialog(null, "Error leyendo la determinante " + d.determinante + " " + d.unidad); 
+            }
             listaDirectorio.add(d);
             
         }
@@ -909,10 +935,19 @@ public class Cdiscisa {
         contentStream.showText(p.area_puesto);  
         
         contentStream.setTextMatrix(new Matrix(1,0,0,1,30,486 ));           
-        contentStream.showText(c.nombre_empresa);
+        if (c.nombre_empresa.equalsIgnoreCase("NUEVA WALMART DE MEXICO S DE RL DE CV")){
+            contentStream.showText("OPERADORA WALMART S DE RL DE CV");
+        }else{
+            contentStream.showText(c.nombre_empresa);
+        }
         
-        
-        char[] rfc_emprea_array = c.rfc_empresa.toCharArray();
+        char[] rfc_emprea_array;
+                
+        if (c.nombre_empresa.equalsIgnoreCase("NUEVA WALMART DE MEXICO S DE RL DE CV")){
+            rfc_emprea_array = "OWM011023AWA".toCharArray();
+        }else{
+            rfc_emprea_array = c.rfc_empresa.toCharArray();
+        }
         
         try{
         int j = 0;
