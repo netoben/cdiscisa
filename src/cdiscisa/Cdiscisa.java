@@ -942,7 +942,7 @@ public class Cdiscisa {
         }
         
         char[] rfc_emprea_array;
-                
+                                            
         if (c.nombre_empresa.equalsIgnoreCase("NUEVA WALMART DE MEXICO S DE RL DE CV")){
             rfc_emprea_array = "OWM011023AWA".toCharArray();
         }else{
@@ -1122,6 +1122,8 @@ public class Cdiscisa {
             case "FORMACIÓN DE BRIGADAS MULTIFUNCIONALES DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi.pdf";            
             break;
             case "FORMACIÓN DE BRIGADA MULTIFUNCIONAL DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi.pdf";            
+            break;
+            case "FORMACION DE BRIGADA MULTIFUNCIONAL DE EMERGENCIAS" : contanciaTemplate = "files/certificado_vacio_multi.pdf";      
             break;
             case "PRIMEROS AUXILIOS" : contanciaTemplate = "files/certificado_vacio_primeros_auxilios.pdf";            
             break;
