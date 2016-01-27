@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 import javax.swing.JFileChooser;
@@ -29,7 +30,15 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-        
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.InetAddress;
+import java.net.ProtocolException;
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  *
@@ -124,11 +133,14 @@ public class MainForm extends javax.swing.JFrame {
      */
     private PassWordDialog passDialog;
     
-    public MainForm() {
+    public MainForm() throws MalformedURLException, IOException {
         initComponents();
         passDialog = new PassWordDialog(this, true);
-        passDialog.setVisible(true);
+        passDialog.setVisible(true);                
         
+        logAccess();
+        
+       
     }
 
     /**
@@ -709,7 +721,38 @@ public class MainForm extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    
+    private void logAccess() throws MalformedURLException, ProtocolException, IOException{
+        
+        String hostname = "Unknown";
+        
+        try
+        {
+            InetAddress addr;
+            addr = InetAddress.getLocalHost();
+            hostname = addr.getHostName();
+        }
+        catch (UnknownHostException ex)
+        {
+            System.out.println("Hostname can not be resolved");
+        }
+        
+        String url = "https://script.google.com/macros/s/AKfycbxkZelT2ayE7qQ4r4SdOFOJ9GBNkKxncHReMrwNuUfQfHJ-PcA/exec?PCname="+hostname+"&username=capacitacion";
+        
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
+        // optional default is GET
+        con.setRequestMethod("GET");
+
+        //add request header
+        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+        int responseCode = con.getResponseCode();
+        System.out.println("response code: " + responseCode);
+        
+    }
+    
     private void generarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generarActionPerformed
         
        
@@ -1070,7 +1113,11 @@ public class MainForm extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new MainForm().setVisible(true);
+                try {
+                    new MainForm().setVisible(true);
+                } catch (IOException ex) {
+                    Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }
