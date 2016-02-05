@@ -12,9 +12,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 
 import javax.swing.JFileChooser;
@@ -36,6 +41,14 @@ import java.net.URL;
 import java.net.InetAddress;
 import java.net.ProtocolException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -134,13 +147,23 @@ public class MainForm extends javax.swing.JFrame {
     private PassWordDialog passDialog;
     
     public MainForm() throws MalformedURLException, IOException {
+        
         initComponents();
         passDialog = new PassWordDialog(this, true);
-        passDialog.setVisible(true);                
-        
+        passDialog.setVisible(true);                        
         logAccess();
         
-       
+        
+        /*Testing for new diplomas
+        String[] args = {"/Users/earmenda/Desktop/DirectorioBAE.xlsx","/Users/earmenda/Desktop/test","/Users/earmenda/Desktop/Lista de Asistencia (BAE 1809) 19 01 2016.xlsx","TSI. Jorge Antonio Razón Gil","Manuel Anguiano Razón","true","true","true","true","true","true","true","true","true","true","","/Users/earmenda/Google Drive/Visio-Expressway.pdf"};
+        try{
+            cdiscisa.Cdiscisa.main(args);
+        }catch(Exception ex){
+            System.out.println(ex.toString());
+        }
+        
+        System.exit(0);
+       */
     }
 
     /**
@@ -217,7 +240,6 @@ public class MainForm extends javax.swing.JFrame {
         chkDiplomaFirma.setFont(new java.awt.Font("Helvetica Neue", 0, 13)); // NOI18N
         chkDiplomaFirma.setSelected(true);
         chkDiplomaFirma.setText("¿Incluir firma del Instructor?");
-        chkDiplomaFirma.setEnabled(false);
 
         chkDC3.setFont(new java.awt.Font("Helvetica", 3, 14)); // NOI18N
         chkDC3.setSelected(true);
@@ -231,27 +253,22 @@ public class MainForm extends javax.swing.JFrame {
         chkConstanciasFirma1.setFont(new java.awt.Font("Helvetica Neue", 0, 13)); // NOI18N
         chkConstanciasFirma1.setSelected(true);
         chkConstanciasFirma1.setText("¿Incluir firma del Instructor?");
-        chkConstanciasFirma1.setEnabled(false);
 
         chkDiplomasLogo.setFont(new java.awt.Font("Helvetica Neue", 0, 13)); // NOI18N
         chkDiplomasLogo.setSelected(true);
         chkDiplomasLogo.setText("¿Incluir logo de ISCISA?");
-        chkDiplomasLogo.setEnabled(false);
 
         chkConstanciasLogo.setFont(new java.awt.Font("Helvetica Neue", 0, 13)); // NOI18N
         chkConstanciasLogo.setSelected(true);
         chkConstanciasLogo.setText("¿Incluir logo de ISCISA?");
-        chkConstanciasLogo.setEnabled(false);
 
         chkDC3Logo.setFont(new java.awt.Font("Helvetica Neue", 0, 13)); // NOI18N
         chkDC3Logo.setSelected(true);
         chkDC3Logo.setText("¿Incluir logo de ISCISA?");
-        chkDC3Logo.setEnabled(false);
 
         chkDC3Firma.setFont(new java.awt.Font("Helvetica Neue", 0, 13)); // NOI18N
         chkDC3Firma.setSelected(true);
         chkDC3Firma.setText("¿Incluir firma del Instructor?");
-        chkDC3Firma.setEnabled(false);
 
         chkConstancias.setFont(new java.awt.Font("Helvetica", 3, 14)); // NOI18N
         chkConstancias.setSelected(true);
@@ -277,7 +294,6 @@ public class MainForm extends javax.swing.JFrame {
 
         cboxUnidadCapacitadora.setFont(new java.awt.Font("Helvetica Neue", 0, 13)); // NOI18N
         cboxUnidadCapacitadora.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TSI. Jorge Antonio Razón Gil", "Grupo ISCISA S.A. de C.V." }));
-        cboxUnidadCapacitadora.setEnabled(false);
         cboxUnidadCapacitadora.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cboxUnidadCapacitadoraActionPerformed(evt);
@@ -286,7 +302,6 @@ public class MainForm extends javax.swing.JFrame {
 
         cboxInstructor.setFont(new java.awt.Font("Helvetica Neue", 0, 13)); // NOI18N
         cboxInstructor.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TSI. Jorge Antonio Razón Gil" }));
-        cboxInstructor.setEnabled(false);
 
         lblUnidadCapacitadora.setFont(new java.awt.Font("Helvetica", 1, 14)); // NOI18N
         lblUnidadCapacitadora.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -401,10 +416,10 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
         txtDirectorio.addInputMethodListener(new java.awt.event.InputMethodListener() {
-            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
-            }
             public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
                 txtDirectorioInputMethodTextChanged(evt);
+            }
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
         txtDirectorio.addActionListener(new java.awt.event.ActionListener() {
@@ -621,10 +636,10 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
         txtRegistro.addInputMethodListener(new java.awt.event.InputMethodListener() {
-            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
-            }
             public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
                 txtRegistroInputMethodTextChanged(evt);
+            }
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
         txtRegistro.addActionListener(new java.awt.event.ActionListener() {
@@ -725,7 +740,10 @@ public class MainForm extends javax.swing.JFrame {
     private void logAccess() throws MalformedURLException, ProtocolException, IOException{
         
         String hostname = "Unknown";
-        
+        String username = "capacitacion";
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        String formatedDate = formatter.format(new Date());
+                
         try
         {
             InetAddress addr;
@@ -737,7 +755,7 @@ public class MainForm extends javax.swing.JFrame {
             System.out.println("Hostname can not be resolved");
         }
         
-        String url = "https://script.google.com/macros/s/AKfycbxkZelT2ayE7qQ4r4SdOFOJ9GBNkKxncHReMrwNuUfQfHJ-PcA/exec?PCname="+hostname+"&username=capacitacion";
+        String url = "https://script.google.com/macros/s/AKfycbxkZelT2ayE7qQ4r4SdOFOJ9GBNkKxncHReMrwNuUfQfHJ-PcA/exec?PCname="+hostname+"&username="+username+"&d="+formatedDate;
         
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -747,10 +765,77 @@ public class MainForm extends javax.swing.JFrame {
 
         //add request header
         con.setRequestProperty("User-Agent", "Mozilla/5.0");
-
-        int responseCode = con.getResponseCode();
-        System.out.println("response code: " + responseCode);
+        int responseCode = 0;
         
+        try{
+            responseCode = con.getResponseCode();
+        }catch(Exception ex){
+            System.out.println(ex.getMessage());
+        }
+        
+        System.out.println("response code: " + responseCode);
+        /*
+        File file=null;
+       
+        try {
+            file = new File("./log.txt");
+            
+        }catch(Exception ex){
+             System.out.println("failed to read log file");
+        }
+        
+        
+        */
+        if (responseCode != 200){
+
+            String s = hostname + "%capacitacion%" + formatedDate+"\n";
+            
+            Files.write(Paths.get("./log.txt"), s.getBytes(), StandardOpenOption.APPEND);
+ 
+        } else {
+            File file = new File("./log.txt");
+            
+            BufferedReader br = new BufferedReader(new FileReader(file));     
+            
+            String line;
+            String [] data;
+            ArrayList <String> newData = new ArrayList<>();
+            ListIterator <String> it = newData.listIterator();
+            
+            while ((line = br.readLine()) != null) {
+               data = line.split("%");
+               
+               if (data.length == 3){
+                   hostname = data[0];
+                   username = data[1];
+                   formatedDate = data[2];
+               }
+                url = "https://script.google.com/macros/s/AKfycbxkZelT2ayE7qQ4r4SdOFOJ9GBNkKxncHReMrwNuUfQfHJ-PcA/exec?PCname="+hostname+"&username="+username+"&d="+formatedDate;
+        
+                obj = new URL(url);
+                con = (HttpURLConnection) obj.openConnection();
+
+                // optional default is GET
+                con.setRequestMethod("GET");
+
+                //add request header
+                con.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+                if (con.getResponseCode() != 200){
+                    break;
+                }else{
+                    newData.add(line);                    
+                }                
+            }
+            
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());           
+            fw.write("");
+            while(it.hasNext()){
+                String nl = it.next();
+                fw.append(nl);            
+            }
+  
+        }
     }
     
     private void generarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generarActionPerformed
@@ -775,9 +860,9 @@ public class MainForm extends javax.swing.JFrame {
         unidadCapacitadora = (String)this.cboxUnidadCapacitadora.getSelectedItem();
         instructor = (String)this.cboxInstructor.getSelectedItem();
         
-        chkDip = String.valueOf(chkDiplomas.isSelected());
+        chkDip = String.valueOf(this.chkDiplomas.isSelected());
         chkDipFirma = String.valueOf(this.chkDiplomaFirma.isSelected());
-        chkDipLogo = String.valueOf(this.chkConstanciasLogo.isSelected());
+        chkDipLogo = String.valueOf(this.chkDiplomasLogo.isSelected());
         
         chkConst = String.valueOf(this.chkConstancias.isSelected());
         chkConstFirma = String.valueOf(this.chkConstanciasFirma1.isSelected());
@@ -785,7 +870,8 @@ public class MainForm extends javax.swing.JFrame {
         
         chkDC3a = String.valueOf(this.chkDC3.isSelected());
         chkDC3Firmaa = String.valueOf(this.chkDC3Firma.isSelected());
-        chkDC3Logoa = String.valueOf(this.chkConstanciasLogo.isSelected());
+        chkDC3Logoa = String.valueOf(this.chkDC3Logo.isSelected());
+        
         chkCompilado = String.valueOf(this.chkArchivoCompilado.isSelected());
         
         registro = this.txtRegistro.getText();
@@ -927,10 +1013,10 @@ public class MainForm extends javax.swing.JFrame {
         
         if (cboxUnidadCapacitadora.getSelectedIndex() == 0){
             cboxInstructor.removeAllItems();
-            cboxInstructor.addItem("Ing. Jorge Antonio Razón Gil");
+            cboxInstructor.addItem("TSI. Jorge Antonio Razón Gil");
         } else {
             cboxInstructor.removeAllItems();
-            cboxInstructor.addItem("Ing. Jorge Antonio Razón Gil");
+            cboxInstructor.addItem("TSI. Jorge Antonio Razón Gil");
             cboxInstructor.addItem("Ing. Jorge Antonio Razón Gutierrez");
             cboxInstructor.addItem("Manuel Anguiano Razón");
         }

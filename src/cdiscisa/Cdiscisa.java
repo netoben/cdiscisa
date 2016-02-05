@@ -52,6 +52,7 @@ import javax.swing.JOptionPane;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 /**
  *
@@ -89,7 +90,7 @@ class Participante {
 
 class Curso{
     String nombre_empresa, nombre_curso, nombre_instructor,horas_texto,fecha_texto_diploma;
-    String razon_social,rfc_empresa, fecha_certificado, capacitador, uCapacitadora;
+    String razon_social,rfc_empresa, fecha_certificado, capacitador, uCapacitadora, registro_jorge,registro_coco,registro_manuel;
     int horas;
     Date fecha_inicio,fecha_termino;
     
@@ -108,6 +109,9 @@ class Curso{
         this.rfc_empresa = "";
         this.uCapacitadora = "";
         this.capacitador = "";
+        this.registro_coco = "DPC-ENL-I-103_2015";
+        this.registro_manuel = "DPC-ENL-I-056_2016";
+        this.registro_jorge = "DPC-ENL-CE-002/2016";
     }
 }
 
@@ -171,10 +175,10 @@ public class Cdiscisa {
             }                       
         } 
 
-        String nameRegistro = "";
+        String nameRegistro;
         
         if (args[15].isEmpty()){
-            nameRegistro = "files/registro_jorge_2015.pdf";
+            nameRegistro = "files/RegistroPCJorge Razon2016.pdf";
         } else {        
             nameRegistro = args[15];
         }
@@ -207,17 +211,20 @@ public class Cdiscisa {
             return;
         }
         
-        Map<String,String> dosc = new HashMap<String,String>();
+        Map<String,String> dosc = new HashMap<>();
         
-        if (args[5].equalsIgnoreCase("true")){            
-            imprimirDiplomas_main(listaParticipantes, c, listaDirectorio, args[6], args[7], args[1], dosc);            
+        if (args[5].equalsIgnoreCase("true")){ //check if diploma checkbox is checked    
+            imprimirDiplomas_main(listaParticipantes, c, listaDirectorio, args[6], args[7], args[1], dosc, args[4]);    // args 6 y 7 son firma y logo respectivamente      
         }
+        
         if (args[8].equalsIgnoreCase("true")){            
-            imprimirConstancias(listaParticipantes, c, listaDirectorio, args[9], args[10], args[1], dosc);
+            imprimirConstancias(listaParticipantes, c, listaDirectorio, args[9], args[10], args[1], dosc, args[4]);
         }
+        
         if (args[11].equalsIgnoreCase("true")){            
             imprimirDC3(listaParticipantes,c, args[12], args[13], args[1], dosc);
         }
+        
         if (args[14].equalsIgnoreCase("true")){            
             mergeFiles(dosc,listaParticipantes,listaDirectorio, nameRegistro, args[16] );
         }
@@ -499,7 +506,7 @@ public class Cdiscisa {
         
         return listaDirectorio;
     }
-    private static void imprimirDiplomas(ArrayList <Participante> listaParticipantes, Curso c, Directorio d, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc) throws IOException{
+    private static void imprimirDiplomas(ArrayList <Participante> listaParticipantes, Curso c, Directorio d, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc, String instructor) throws IOException{
           
         ListIterator <Participante> it = listaParticipantes.listIterator();
         Participante p1 = null;
@@ -510,22 +517,44 @@ public class Cdiscisa {
         PDDocument documentSingle;
         
         InputStream file = null;
-        String nameSingle = "";
-               
-        if (chkDipFirma.equalsIgnoreCase("true") && chkDipLogo.equalsIgnoreCase("true")){
-            nameSingle = "files/diploma_simple_vacio.pdf";            
-        } else if(chkDipFirma.equalsIgnoreCase("true") ){
-            nameSingle = "files/diploma_simple_vacio.pdf"; 
-        } else if(chkDipLogo.equalsIgnoreCase("true")){
-            nameSingle = "files/diploma_simple_vacio.pdf"; 
-        } else{
-            nameSingle = "files/diploma_simple_vacio.pdf"; 
-        }       
+        
+        File logo = null;
+        File firma = null;
         
         try{
-            file = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream(nameSingle);
+             logo = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/logo.png").getFile());
+             
+             if(instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
+                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaCoco.png").getFile());
+             } else if (instructor.equalsIgnoreCase("Manuel Anguiano Razón")){
+                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaManuel.png").getFile());
+             } else {
+                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaJorge.png").getFile());
+            }
+             
+        }catch (Exception ex){
+            JOptionPane.showMessageDialog(null, "Error al cargar la imagen del logo o la firma \nfile: " + String.valueOf(logo) + "\n" + String.valueOf(firma) + "\n" + ex.toString());
+        }
+        
+        PDImageXObject firmaObject = null;
+        PDImageXObject logoObject = null;
+        
+        try{
+            if (chkDipFirma.equalsIgnoreCase("true")){
+                firmaObject = PDImageXObject.createFromFile(firma, document);
+            }
+            if (chkDipLogo.equalsIgnoreCase("true")){
+                logoObject = PDImageXObject.createFromFile(logo, document);
+            }
+        }catch(Exception ex){
+            JOptionPane.showMessageDialog(null, "Error al crear objetos de logo o firma \nfile: " + String.valueOf(logoObject) + "\n" + String.valueOf(firmaObject) + "\n" + ex.toString());
+        }
+        
+
+        try{
+            file = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/n_diploma_simple_vacio_nf_nl_nr.pdf");
         } catch (Exception ex){
-            JOptionPane.showMessageDialog(null, "Error al cargar el el diploma single base. \ndiploma: " + nameSingle +  "\nfile: " + String.valueOf(file) + "\n" + ex.toString());
+            JOptionPane.showMessageDialog(null, "Error al cargar el el diploma single base. \ndiploma: files/n_diploma_simple_vacio_nf_nl_nr.pdf \nfile: " + String.valueOf(file) + "\n" + ex.toString());
         }
                 
         documentSingle = PDDocument.load(file);
@@ -540,22 +569,11 @@ public class Cdiscisa {
         PDDocument documentDoble;
         
         InputStream file2 = null;
-        String nameDoble = "";
-        
-        if (chkDipFirma.equalsIgnoreCase("true") && chkDipLogo.equalsIgnoreCase("true")){
-            nameDoble = "files/diploma_doble_vacio.pdf";
-        } else if(chkDipFirma.equalsIgnoreCase("true") ){
-            nameDoble = "files/diploma_doble_vacio.pdf";
-        } else if(chkDipLogo.equalsIgnoreCase("true")){
-            nameDoble = "files/diploma_doble_vacio.pdf";
-        } else{
-            nameDoble = "files/diploma_doble_vacio.pdf";
-        }
-        
+
         try{
-            file2 = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream(nameDoble);
+            file2 = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/n_diploma_doble_vacio_nf_nl_nr.pdf");
         } catch (Exception ex){
-            JOptionPane.showMessageDialog(null, "Error al cargar el el diploma doble base. \ndiploma: " + nameDoble +  "\nfile: " + String.valueOf(file2) + "\n" + ex.toString());
+            JOptionPane.showMessageDialog(null, "Error al cargar el el diploma doble base. \ndiploma: n_diploma_doble_vacio_nf_nl_nr.pdf\nfile: " + String.valueOf(file2) + "\n" + ex.toString());
         }
         
         documentDoble = PDDocument.load(file2);
@@ -582,14 +600,14 @@ public class Cdiscisa {
         calibri = PDType0Font.load(document, isFont1);
         calibriBold = PDType0Font.load(document,isFont2);
         pristina = PDType0Font.load(document, isFont3);
-     
+        
         if(listaParticipantes.size() % 2 == 0 && listaParticipantes.size() >= 2){
             
             while (it.hasNext()){
                 p1 = it.next();
                 p2 = it.next();
                 
-                imprimirDiplomaDoble(p1,p2,c,d,document,templatePageDoble, calibri,calibriBold,pristina);
+                imprimirDiplomaDoble(p1,p2,c,d,document,templatePageDoble, calibri,calibriBold,pristina, logoObject, firmaObject, instructor);
             } 
         } else {
             if (listaParticipantes.size() > 1){
@@ -598,18 +616,18 @@ public class Cdiscisa {
                     
                     if (it.nextIndex() == listaParticipantes.size() - 1){
                         p1 = it.next();
-                        imprimirDiplomaArriba(p1,c,d,document,templatePageSingle,calibri,calibriBold,pristina);
+                        imprimirDiplomaArriba(p1,c,d,document,templatePageSingle,calibri,calibriBold,pristina, logoObject, firmaObject, instructor);
                         break;
                     }
                     
                     p1 = it.next();
                     p2 = it.next();
                 
-                    imprimirDiplomaDoble(p1,p2,c,d,document,templatePageDoble,calibri,calibriBold,pristina);
+                    imprimirDiplomaDoble(p1,p2,c,d,document,templatePageDoble,calibri,calibriBold,pristina, logoObject, firmaObject, instructor);
                 }          
             } else if (listaParticipantes.size() == 1){
                 p1 = it.next();
-                imprimirDiplomaArriba(p1,c,d,document,templatePageSingle,calibri,calibriBold,pristina);
+                imprimirDiplomaArriba(p1,c,d,document,templatePageSingle,calibri,calibriBold,pristina,logoObject, firmaObject, instructor);
             }  
             
         }
@@ -623,18 +641,7 @@ public class Cdiscisa {
         
         dosc.put(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_MULTI_" + formatedDate + ".pdf",d.determinante);
     }
-    private static void imprimirDiplomaArriba(Participante p1, Curso c, Directorio d, PDDocument document, PDPage page, PDFont calibri, PDFont calibriBold, PDFont pristina) throws IOException{
-        
-        /*ListIterator <Directorio> it = listaDirectorio.listIterator();
-        
-        Directorio d = null;
-        
-         while (it.hasNext()){
-              d = it.next();
-             if (d.determinante.equalsIgnoreCase(p1.determinante)){
-                break;
-             }
-         }*/
+    private static void imprimirDiplomaArriba(Participante p1, Curso c, Directorio d, PDDocument document, PDPage page, PDFont calibri, PDFont calibriBold, PDFont pristina, PDImageXObject logoObject, PDImageXObject firmaObject, String instructor) throws IOException{
         
         COSDictionary pageDict = page.getCOSObject();
         COSDictionary newPageDict = new COSDictionary(pageDict);
@@ -653,15 +660,16 @@ public class Cdiscisa {
         // Print Name
         contentStream.beginText();
         contentStream.setFont( pristina, 28 );
-        contentStream.setNonStrokingColor(0,112,192);
+        //contentStream.setNonStrokingColor(0,112,192);
+        contentStream.setNonStrokingColor(0,128,0);
         
         float nameWidth = pristina.getStringWidth(p1.nombre + " " + p1.apellidos) /1000 * 28;
         
         //System.out.println("nameWidth: " + nameWidth);
         
-        float xPosition = (pageWidth - nameWidth)/2 + 15;
+        float xPosition = (pageWidth - nameWidth)/2;
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,622 ));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,641 ));           
         contentStream.showText(p1.nombre + " " + p1.apellidos);
         
         contentStream.setFont( calibri, 15 );
@@ -671,19 +679,19 @@ public class Cdiscisa {
         //System.out.println("nameWidth: " + nameWidth);
         xPosition = (pageWidth - nameWidth)/2;
          
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,597 ));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,615 ));           
         contentStream.showText(c.razon_social);
         
         contentStream.setFont( calibri, 11 );
         contentStream.setNonStrokingColor(Color.BLACK);
          
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,275, (float) 581.4));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,255, 593));           
         contentStream.showText(p1.determinante + " " + d.unidad);
-        
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,235,(float)524.5));           
+         
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,210, (float)538.5));           
         contentStream.showText(c.horas_texto);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,360,(float)524.5));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,394,(float)538.5));           
         contentStream.showText(c.fecha_texto_diploma);
         
         contentStream.setFont( calibriBold, 10 ); 
@@ -691,18 +699,87 @@ public class Cdiscisa {
         float nameWidthStroked = calibri.getStringWidth(c.nombre_curso) /1000 * 10;
         //System.out.println("nameWidth: " + nameWidthStroked);
         float strokePosition = (pageWidth - nameWidthStroked)/2;
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,strokePosition, 540 ));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,strokePosition, 554 ));           
         contentStream.showText(c.nombre_curso);
         
+        contentStream.setFont( calibri, 8 ); 
+        contentStream.setNonStrokingColor(Color.GRAY);
         
-        
+        if (instructor.equalsIgnoreCase("Manuel Anguiano Razón")){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 457 ));
+            contentStream.showText("Registro STPS: GIS100219KK8003");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 447 ));
+            contentStream.showText("Registro PC: " + c.registro_manuel);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 437 ));
+            contentStream.showText("Registro PC: " + c.registro_jorge);
+            
+        } else if (instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 457 ));
+            contentStream.showText("Registro STPS: GIS100219KK8003");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 447 ));
+            contentStream.showText("Registro PC: " + c.registro_coco);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 437 ));
+            contentStream.showText("Registro PC: " + c.registro_jorge);
+        } else {
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 457 ));
+            contentStream.showText("Registro STPS: GIS100219KK8003");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 447 ));
+            contentStream.showText("Registro STPS: RAGJ610813BIA005");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 437 ));
+            contentStream.showText("Registro PC: " + c.registro_jorge);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,270, 447 ));
+            contentStream.showText("Registro PC: SPC-COAH-056-2015");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,270, 437));
+            contentStream.showText("Registro PC: CGPC-28/6016/026/NL-PS14");
+        }
+        // "Registro PC: DPC-ENL-CE-002/2015"
+        // DPC-ENL-I-103_2015 "Ing. Jorge Antonio Razón Gutierrez"
+        // DPC-ENL-I-056_2015 "Manuel Anguiano Razón"
+        // "TSI. Jorge Antonio Razón Gil"
+
         contentStream.endText();
         
         contentStream.setStrokingColor(Color.BLACK);
-        contentStream.moveTo(strokePosition,538);
-        contentStream.lineTo(strokePosition + nameWidthStroked + 4, 538);
+        contentStream.setLineWidth(1);
+        contentStream.moveTo(strokePosition,552);
+        contentStream.lineTo(strokePosition + nameWidthStroked + 6, 552);        
         contentStream.stroke();
         
+        if (logoObject != null && !logoObject.isEmpty()){
+            contentStream.drawImage(logoObject, 451,700,130,65);
+        }
+        if (firmaObject != null && !firmaObject.isEmpty()){
+            contentStream.drawImage(firmaObject, 452,440,110,42);
+
+            contentStream.beginText();
+            contentStream.setFont(calibri, 10);
+            contentStream.setNonStrokingColor(Color.BLACK);
+            nameWidth = calibri.getStringWidth(instructor) /1000 * 10;            
+            xPosition = 505 - nameWidth/2;
+            
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 445 ));           
+            contentStream.showText(instructor);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,485, 435 ));           
+            contentStream.showText("Instructor");
+            contentStream.endText();
+        }
+        /*
+        System.out.println("logoWidth: " + logoObject.getWidth());
+        System.out.println("logoHeight: " + logoObject.getHeight());
+        System.out.println("firmaWidth: " + firmaObject.getWidth());
+        System.out.println("firmaHeight: " + firmaObject.getHeight());
+        */
+        
+        
+        
+        /*
+        contentStream.addRect(50, 750, 500, 100);
+        contentStream.setNonStrokingColor(Color.WHITE);
+        contentStream.fill();
+        contentStream.drawImage(logo, 430,700,150,75);
+        contentStream.drawImage(firma, 93,239,72,29);
+        */
+         
         // Make sure that the content stream is closed:
         contentStream.close();
         
@@ -711,18 +788,7 @@ public class Cdiscisa {
 
 
     }
-    private static void imprimirDiplomaDoble(Participante p1, Participante p2, Curso c, Directorio d, PDDocument document, PDPage page, PDFont calibri, PDFont calibriBold, PDFont pristina) throws IOException{
-        
-        /*Directorio d = null;
-        
-        ListIterator <Directorio> it = listaDirectorio.listIterator();
- 
-        while (it.hasNext()){
-              d = it.next();
-             if (d.determinante.equalsIgnoreCase(p1.determinante)){
-                break;
-             }
-        }*/
+    private static void imprimirDiplomaDoble(Participante p1, Participante p2, Curso c, Directorio d, PDDocument document, PDPage page, PDFont calibri, PDFont calibriBold, PDFont pristina, PDImageXObject logoObject, PDImageXObject firmaObject, String instructor) throws IOException{
 
         COSDictionary pageDict = page.getCOSObject();
         COSDictionary newPageDict = new COSDictionary(pageDict);
@@ -732,19 +798,18 @@ public class Cdiscisa {
         
         // Start a new content stream which will "hold" the to be created content
         PDPageContentStream contentStream = new PDPageContentStream(document, newPage, true, true);
-        
-        //PDImageXObject ximage = PDImageXObject.createFromFile("src/files/logo.png", document);
-        //contentStream.drawImage(ximage, 100, 10);
                 
         float pageWidth = newPage.getMediaBox().getWidth();
         float pageHeight = newPage.getMediaBox().getHeight();
         
         //System.out.println("pageWidth: " + pageWidth + "\npageHeight: " + pageHeight);
 
-        // Print Upper Side
+        // Print UP Side
+        
         contentStream.beginText();
         contentStream.setFont( pristina, 28 );
-        contentStream.setNonStrokingColor(0,112,192);
+        //contentStream.setNonStrokingColor(0,112,192);
+        contentStream.setNonStrokingColor(0,128,0);
         
         float nameWidth = pristina.getStringWidth(p1.nombre + " " + p1.apellidos) /1000 * 28;
         
@@ -752,7 +817,7 @@ public class Cdiscisa {
         
         float xPosition = (pageWidth - nameWidth)/2 + 15;
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,622 ));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,641 ));           
         contentStream.showText(p1.nombre + " " + p1.apellidos);
         
         contentStream.setFont( calibri, 15 );
@@ -762,19 +827,19 @@ public class Cdiscisa {
         //System.out.println("nameWidth: " + nameWidth);
         xPosition = (pageWidth - nameWidth)/2;
          
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,597 ));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,615 ));           
         contentStream.showText(c.razon_social);
         
         contentStream.setFont( calibri, 11 );
         contentStream.setNonStrokingColor(Color.BLACK);
          
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,275, (float) 581.4));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,275, 593));           
         contentStream.showText(p1.determinante + " " + d.unidad);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,235,(float)524.5));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,210,(float)538.5));           
         contentStream.showText(c.horas_texto);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,360,(float)524.5));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,394,(float)538.5));           
         contentStream.showText(c.fecha_texto_diploma);
         
         contentStream.setFont( calibriBold, 10 ); 
@@ -782,40 +847,83 @@ public class Cdiscisa {
         float nameWidthStroked = calibri.getStringWidth(c.nombre_curso) /1000 * 10;
         //System.out.println("nameWidth: " + nameWidthStroked);
         float strokePosition = (pageWidth - nameWidthStroked)/2;
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,strokePosition, 540 ));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,strokePosition, 554 ));           
         contentStream.showText(c.nombre_curso);
         
         
+        contentStream.setFont( calibri, 8 ); 
+        contentStream.setNonStrokingColor(Color.GRAY);
+        
+        if (instructor.equalsIgnoreCase("Manuel Anguiano Razón")){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 457 ));
+            contentStream.showText("Registro STPS: GIS100219KK8003");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 447 ));
+            contentStream.showText("Registro PC: " + c.registro_manuel);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 437 ));
+            contentStream.showText("Registro PC: " + c.registro_jorge);
+            
+        } else if (instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 457 ));
+            contentStream.showText("Registro STPS: GIS100219KK8003");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 447 ));
+            contentStream.showText("Registro PC: " + c.registro_coco);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 437 ));
+            contentStream.showText("Registro PC: " + c.registro_jorge);
+        } else {
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 457 ));
+            contentStream.showText("Registro STPS: GIS100219KK8003");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 447 ));
+            contentStream.showText("Registro STPS: RAGJ610813BIA005");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 437 ));
+            contentStream.showText("Registro PC: " + c.registro_jorge);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,270, 447 ));
+            contentStream.showText("Registro PC: SPC-COAH-056-2015");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,270, 437));
+            contentStream.showText("Registro PC: CGPC-28/6016/026/NL-PS14");
+        }
         
         contentStream.endText();
         
         contentStream.setStrokingColor(Color.BLACK);
-        contentStream.moveTo(strokePosition,538);
-        contentStream.lineTo(strokePosition + nameWidthStroked + 4, 538);
+        contentStream.setLineWidth(1);  
+        contentStream.moveTo(strokePosition,552);
+        contentStream.lineTo(strokePosition + nameWidthStroked + 6,552);
         contentStream.stroke();
+        
+        if (logoObject != null && !logoObject.isEmpty()){
+            contentStream.drawImage(logoObject, 451,700,130,65);
+        }
+        if (firmaObject != null && !firmaObject.isEmpty()){
+            contentStream.setStrokingColor(Color.BLACK);
+            contentStream.drawImage(firmaObject, 452,440,110,42);
+            contentStream.beginText();
+            contentStream.setFont(calibri, 10);
+            nameWidth = calibri.getStringWidth(instructor) /1000 * 10;            
+            xPosition = 505 - nameWidth/2;
+            
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 445 ));           
+            contentStream.showText(instructor);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,485, 435 ));           
+            contentStream.showText("Instructor");
+            contentStream.endText();
+        }
+        
         
         
         // Print DOWN Side
-        /*it = listaDirectorio.listIterator();
- 
-        while (it.hasNext()){
-              d = it.next();
-             if (d.determinante.equalsIgnoreCase(p2.determinante)){
-                break;
-             }
-        }*/
         
         contentStream.beginText();
         contentStream.setFont( pristina, 28 );
-        contentStream.setNonStrokingColor(0,112,192);
+        //contentStream.setNonStrokingColor(0,112,192);
+        contentStream.setNonStrokingColor(0,128,0);
         
         nameWidth = pristina.getStringWidth(p2.nombre + " " + p2.apellidos) /1000 * 28;
         
         //System.out.println("nameWidth: " + nameWidth);
         
-        xPosition = (pageWidth - nameWidth)/2 + 15;
+        xPosition = (pageWidth - nameWidth)/2;
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,246 ));          
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,262 ));          
         contentStream.showText(p2.nombre + " " + p2.apellidos);
         
         contentStream.setFont( calibri, 15 );
@@ -825,19 +933,19 @@ public class Cdiscisa {
         //System.out.println("nameWidth: " + nameWidth);
         xPosition = (pageWidth - nameWidth)/2;
          
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,220 ));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,235 ));           
         contentStream.showText(c.razon_social);
         
         contentStream.setFont( calibri, 11 );
         contentStream.setNonStrokingColor(Color.BLACK);
          
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,275, (float) 204.4));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,275, (float) 213.4));           
         contentStream.showText(p2.determinante + " " + d.unidad);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,235,(float)147.5));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,210,159));           
         contentStream.showText(c.horas_texto);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,360,(float)147.5));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,394,159));           
         contentStream.showText(c.fecha_texto_diploma);
         
         contentStream.setFont( calibriBold, 10 ); 
@@ -845,19 +953,68 @@ public class Cdiscisa {
         nameWidthStroked = calibri.getStringWidth(c.nombre_curso) /1000 * 10;
         //System.out.println("nameWidth: " + nameWidthStroked);
         strokePosition = (pageWidth - nameWidthStroked)/2;
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,strokePosition, 163 ));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,strokePosition, 174 ));           
         contentStream.showText(c.nombre_curso);
         
         
+        contentStream.setFont( calibri, 8 ); 
+        contentStream.setNonStrokingColor(Color.GRAY);
+        
+        if (instructor.equalsIgnoreCase("Manuel Anguiano Razón")){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 74 ));
+            contentStream.showText("Registro STPS: GIS100219KK8003");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 64 ));
+            contentStream.showText("Registro PC: " + c.registro_manuel);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 54 ));
+            contentStream.showText("Registro PC: " + c.registro_jorge);
+            
+        } else if (instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 74 ));
+            contentStream.showText("Registro STPS: GIS100219KK8003");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 64 ));
+            contentStream.showText("Registro PC: " + c.registro_coco);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,170, 54 ));
+            contentStream.showText("Registro PC: " + c.registro_jorge);
+        } else {
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 74 ));
+            contentStream.showText("Registro STPS: GIS100219KK8003");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 64 ));
+            contentStream.showText("Registro STPS: RAGJ610813BIA005");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 54 ));
+            contentStream.showText("Registro PC: " + c.registro_jorge);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,270, 64 ));
+            contentStream.showText("Registro PC: SPC-COAH-056-2015");
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,270, 54));
+            contentStream.showText("Registro PC: CGPC-28/6016/026/NL-PS14");
+        }
         
         contentStream.endText();
         
         contentStream.setStrokingColor(Color.BLACK);
-        contentStream.moveTo(strokePosition,161);
-        contentStream.lineTo(strokePosition + nameWidthStroked + 4, 161);
+        contentStream.moveTo(strokePosition,172);
+        contentStream.lineTo(strokePosition + nameWidthStroked + 6, 172);
         contentStream.stroke();
         
-        
+        if (logoObject != null && !logoObject.isEmpty()){
+            contentStream.drawImage(logoObject, 451,320,130,65);
+        }
+        if (firmaObject != null && !firmaObject.isEmpty()){
+            contentStream.drawImage(firmaObject, 452,62,110,42);
+
+            contentStream.beginText();
+            contentStream.setFont(calibri, 10);
+            contentStream.setStrokingColor(Color.BLACK);
+            nameWidth = calibri.getStringWidth(instructor) /1000 * 10;
+            
+            xPosition = 505 - nameWidth/2;
+            
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 67 ));
+            
+            contentStream.showText(instructor);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,485, 57 ));           
+            contentStream.showText("Instructor");
+            contentStream.endText();
+        }
         // Make sure that the content stream is closed:
         contentStream.close();
         
@@ -865,7 +1022,7 @@ public class Cdiscisa {
         //document.save( "DiplomaSoloTest.pdf");
         //document.close();
     }
-    private static void imprimirDC3(ArrayList <Participante> listaParticipantes, Curso c, String chkDC3Firmaa, String chkDC3Logoa, String savePath,  Map<String,String> dosc) throws IOException{
+    private static void imprimirDC3(ArrayList <Participante> listaParticipantes, Curso c, String chkDC3Firmaa, String chkDC3Logoa, String savePath,  Map<String,String> dosc) throws IOException{   
         
         ListIterator <Participante> it = listaParticipantes.listIterator();
         Participante p;
@@ -885,23 +1042,45 @@ public class Cdiscisa {
         InputStream file = null;
         
         try{
-             file = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/DC3_base_firma.pdf");
+            file = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/DC3_blank.pdf");
+            //file = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/DC3_base_firma.pdf");
         }catch (Exception ex){
             JOptionPane.showMessageDialog(null, "Error al cargar el una forma DC3 \nfile: " + String.valueOf(file) + "\n" + ex.toString());
         }
         document = PDDocument.load(file);
-        /*
-        if(chkDC3Firmaa.equalsIgnoreCase("true") && chkDC3Logoa.equalsIgnoreCase("true")){
-            document = PDDocument.load(new File("src/files/DC3_base_firma.pdf"));
-        } else if (chkDC3Firmaa.equalsIgnoreCase("true")){
-            document = PDDocument.load(new File("src/files/DC3_base_firma.pdf"));
-        } else if (chkDC3Logoa.equalsIgnoreCase("true")){
-            document = PDDocument.load(new File("src/files/DC3_base_firma.pdf"));
-        } else{
-            document = PDDocument.load(new File("src/files/DC3_base_firma.pdf"));
-        }   */
-         
         
+        File logo = null;
+        File firma = null;
+        
+        try{
+             logo = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/logo.png").getFile());
+             
+             if(c.capacitador.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
+                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaCoco.png").getFile());
+             } else if (c.capacitador.equalsIgnoreCase("Manuel Anguiano Razón")){
+                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaManuel.png").getFile());
+             } else {
+                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaJorge.png").getFile());
+            }
+             
+        }catch (Exception ex){
+            JOptionPane.showMessageDialog(null, "Error al cargar la imagen del logo o la firma \nfile: " + String.valueOf(logo) + "\n" + String.valueOf(firma) + "\n" + ex.toString());
+        }
+        
+        PDImageXObject firmaObject = null;
+        PDImageXObject logoObject = null;
+        
+        try{
+            if (chkDC3Firmaa.equalsIgnoreCase("true")){
+                firmaObject = PDImageXObject.createFromFile(firma, document);
+            }
+            if (chkDC3Logoa.equalsIgnoreCase("true")){
+                logoObject = PDImageXObject.createFromFile(logo, document);
+            }
+        }catch(Exception ex){
+            JOptionPane.showMessageDialog(null, "Error al crear objetos de logo o firma \nfile: " + String.valueOf(logoObject) + "\n" + String.valueOf(firmaObject) + "\n" + ex.toString());
+        }
+
         
         PDPage page = (PDPage)document.getDocumentCatalog().getPages().get(0);         
         PDFont helvetica = PDType1Font.HELVETICA_BOLD;
@@ -973,11 +1152,16 @@ public class Cdiscisa {
         contentStream.setTextMatrix(new Matrix(1,0,0,1,30,381 ));           
         contentStream.showText(c.horas_texto);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,30,356 ));           
-        contentStream.showText("6000 SEGURIDAD");
+        if (c.nombre_empresa.equalsIgnoreCase("NUEVA WALMART DE MEXICO S DE RL DE CV")){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,30,356 ));           
+            contentStream.showText("6000 SEGURIDAD");
+        } else{
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,30,356 ));           
+            contentStream.showText(p.area_tematica);
+        }
         
         contentStream.setTextMatrix(new Matrix(1,0,0,1,30,332 ));           
-        contentStream.showText(c.capacitador);
+        contentStream.showText(c.uCapacitadora);
         
         
         Calendar cal = Calendar.getInstance();
@@ -1016,7 +1200,7 @@ public class Cdiscisa {
             //System.out.println(p.area_tematica + " : " + charWidth);
             if (charWidth >= 260){
                 contentStream.setFont( helvetica_normal, 8 );
-                charWidth = helvetica_normal.getStringWidth(p.area_tematica) /1000 * 8;
+                //charWidth = helvetica_normal.getStringWidth(p.area_tematica) /1000 * 8;
                 //System.out.println(p.area_tematica + " : " + charWidth);
             }
         }
@@ -1037,8 +1221,9 @@ public class Cdiscisa {
         //month: 507, 528
         //day: 549, 570
 
-        /*
+        
         // 32, 49, 63, 77, 92, 106.5, 120, 134.5, 149, 163, 177, 191.5, 205, 223, 241, 255, 269, 286  
+        /*Esto es para medir las casillas del curp
         contentStream.setStrokingColor(Color.BLACK);
         contentStream.moveTo(286,569);
         contentStream.lineTo(286,580);
@@ -1053,13 +1238,53 @@ public class Cdiscisa {
         System.out.println("logoHeight: " + logo.getHeight());
         System.out.println("firmaWidth: " + firma.getWidth());
         System.out.println("firmaHeight: " + firma.getHeight());
-        
+        */
         contentStream.addRect(50, 750, 500, 100);
         contentStream.setNonStrokingColor(Color.WHITE);
         contentStream.fill();
-        contentStream.drawImage(logo, 430,700,150,75);
-        contentStream.drawImage(firma, 93,239,72,29);
-        */
+        
+        contentStream.addRect(50, 224, 150, 10);
+        contentStream.setNonStrokingColor(Color.WHITE);
+        contentStream.fill();
+        
+        if (logoObject != null && !logoObject.isEmpty()){
+            contentStream.drawImage(logoObject, 430,700,150,75);
+        }
+        if (firmaObject != null && !firmaObject.isEmpty()){
+            contentStream.drawImage(firmaObject, 80,223,110,42);
+        
+            contentStream.setStrokingColor(Color.BLACK);
+            contentStream.setLineWidth((float).8);
+            contentStream.moveTo(50,(float)235.6);
+            contentStream.lineTo(200,(float)235.6);
+            contentStream.stroke();
+            
+        }
+  
+        contentStream.beginText();
+        contentStream.setFont( helvetica_normal, 8 );
+        contentStream.setNonStrokingColor(Color.BLACK);
+
+        charWidth = helvetica_normal.getStringWidth(c.nombre_instructor) /1000 * 8;
+        float x = 140 - charWidth/2;
+                
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,x,228 ));           
+        contentStream.showText(c.capacitador); 
+        //GIS100219KK8003
+        String regUnidad;
+        
+        if (c.uCapacitadora.equalsIgnoreCase("TSI. Jorge Antonio Razón Gil")){
+            regUnidad = "RAGJ610813BIA005";
+        } else {
+            regUnidad = "GIS100219KK8003";
+        }
+        
+        charWidth = helvetica_normal.getStringWidth(regUnidad) /1000 * 8;
+        x = 140 - charWidth/2 - 12;
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,x,219 ));           
+        contentStream.showText(regUnidad); 
+        
+        contentStream.endText();
         
          // Make sure that the content stream is closed:
         contentStream.close();
@@ -1074,7 +1299,7 @@ public class Cdiscisa {
         
         
     }
-    private static void imprimirConstancias(ArrayList <Participante> listaParticipantes, Curso c, ArrayList <Directorio> listaDirectorio, String chkConstFirma, String chkConstLogo, String savePath, Map<String,String> dosc) throws IOException {
+    private static void imprimirConstancias(ArrayList <Participante> listaParticipantes, Curso c, ArrayList <Directorio> listaDirectorio, String chkConstFirma, String chkConstLogo, String savePath, Map<String,String> dosc, String instructor) throws IOException {
         
         
         ArrayList <Directorio> listaDirecciones = new ArrayList <> ();
@@ -1095,37 +1320,38 @@ public class Cdiscisa {
             }
         }
         
+        
         ListIterator <Directorio> itDireccionesConstancia = listaDirecciones.listIterator(); 
         while (itDireccionesConstancia.hasNext()){
             Directorio d = itDireccionesConstancia.next();
-            imprimirUnaConstancia(listaParticipantes, c, d, chkConstFirma, chkConstLogo, savePath, dosc);
+            imprimirUnaConstancia(listaParticipantes, c, d, chkConstFirma, chkConstLogo, savePath, dosc, instructor);
         }
       
     }
-    private static void imprimirUnaConstancia(ArrayList <Participante> listaParticipantes, Curso c, Directorio d, String chkConstFirma, String chkConstLogo, String savePath, Map<String,String> dosc) throws IOException {
+    private static void imprimirUnaConstancia(ArrayList <Participante> listaParticipantes, Curso c, Directorio d, String chkConstFirma, String chkConstLogo, String savePath, Map<String,String> dosc, String instructor) throws IOException {
         
         String contanciaTemplate = "";
         
         switch (c.nombre_curso){
-            case "PREVENCIÓN Y COMBATE DE INCENDIOS I" : contanciaTemplate = "files/certificado_vacio_incendio_basico.pdf";            
+            case "PREVENCIÓN Y COMBATE DE INCENDIOS I" : contanciaTemplate = "files/certificado_vacio_incendio_basico_nf.pdf";            
             break;
-            case "BUSQUEDA Y RESCATE" : contanciaTemplate = "files/certificado_vacio_busq_rescate.pdf";            
+            case "BUSQUEDA Y RESCATE" : contanciaTemplate = "files/certificado_vacio_busq_rescate_nf.pdf";            
             break;
-            case "EVACUACIÓN, BUSQUEDA Y RESCATE" : contanciaTemplate = "files/certificado_vacio_evac_busq_resc.pdf";            
+            case "EVACUACIÓN, BUSQUEDA Y RESCATE" : contanciaTemplate = "files/certificado_vacio_evac_busq_resc_nf.pdf";            
             break;
-            case "EVACUACIÓN" : contanciaTemplate = "files/certificado_vacio_evacuacion.pdf";            
+            case "EVACUACIÓN" : contanciaTemplate = "files/certificado_vacio_evacuacion_nf.pdf";            
             break;
-            case "PREVENCIÓN Y COMBATE DE INCENDIOS II" : contanciaTemplate = "files/certificado_vacio_incendio_intermedio.pdf";            
+            case "PREVENCIÓN Y COMBATE DE INCENDIOS II" : contanciaTemplate = "files/certificado_vacio_incendio_intermedio_nf.pdf";            
             break;
-            case "PREVENCIÓN Y COMBATE DE INCENDIOS III" : contanciaTemplate = "files/certificado_vacio_incendio_avanzado.pdf";            
+            case "PREVENCIÓN Y COMBATE DE INCENDIOS III" : contanciaTemplate = "files/certificado_vacio_incendio_avanzado_nf.pdf";            
             break;
-            case "FORMACIÓN DE BRIGADAS MULTIFUNCIONALES DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi.pdf";            
+            case "FORMACION DE BRIGADAS MULTIFUNCIONALES DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi_nf.pdf";            
             break;
-            case "FORMACIÓN DE BRIGADA MULTIFUNCIONAL DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi.pdf";            
+            case "FORMACIÓN DE BRIGADA MULTIFUNCIONAL DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi_nf.pdf";            
             break;
-            case "FORMACION DE BRIGADA MULTIFUNCIONAL DE EMERGENCIAS" : contanciaTemplate = "files/certificado_vacio_multi.pdf";      
+            case "FORMACION DE BRIGADA MULTIFUNCIONAL DE EMERGENCIAS" : contanciaTemplate = "files/certificado_vacio_multi_nf.pdf";      
             break;
-            case "PRIMEROS AUXILIOS" : contanciaTemplate = "files/certificado_vacio_primeros_auxilios.pdf";            
+            case "PRIMEROS AUXILIOS" : contanciaTemplate = "files/certificado_vacio_primeros_auxilios_nf.pdf";            
             break;
             default : contanciaTemplate = "files/cerificado_vacio.pdf";
             break;
@@ -1144,6 +1370,40 @@ public class Cdiscisa {
 
         PDPageContentStream contentStream = new PDPageContentStream(document, page1, true, true);
         PDPageContentStream contentStream2 = new PDPageContentStream(document, page2, true, true);
+        
+        float pageWidth = page1.getMediaBox().getWidth();
+        
+        File logo = null;
+        File firma = null;
+        
+        try{
+             logo = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/logo.png").getFile());
+             
+             if(instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
+                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaCoco.png").getFile());
+             } else if (instructor.equalsIgnoreCase("Manuel Anguiano Razón")){
+                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaManuel.png").getFile());
+             } else {
+                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaJorge.png").getFile());
+            }
+             
+        }catch (Exception ex){
+            JOptionPane.showMessageDialog(null, "Error al cargar la imagen del logo o la firma \nfile: " + String.valueOf(logo) + "\n" + String.valueOf(firma) + "\n" + ex.toString());
+        }
+        
+        PDImageXObject firmaObject = null;
+        PDImageXObject logoObject = null;
+        
+        try{
+            if (chkConstFirma.equalsIgnoreCase("true")){
+                firmaObject = PDImageXObject.createFromFile(firma, document);
+            }
+            if (chkConstLogo.equalsIgnoreCase("true")){
+                logoObject = PDImageXObject.createFromFile(logo, document);
+            }
+        }catch(Exception ex){
+            JOptionPane.showMessageDialog(null, "Error al crear objetos de logo o firma \nfile: " + String.valueOf(logoObject) + "\n" + String.valueOf(firmaObject) + "\n" + ex.toString());
+        }
         
         InputStream isFont1 = null, isFont2 = null;
         try{
@@ -1191,7 +1451,7 @@ public class Cdiscisa {
         
         charWidth = calibriBold.getStringWidth(c.nombre_curso) /1000 * 11;
         
-        float pageWidth = page1.getMediaBox().getWidth();
+        
         float xPosition = (pageWidth - charWidth)/2;
                 
         contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 500));           
@@ -1246,6 +1506,43 @@ public class Cdiscisa {
         }
         
         contentStream.endText();
+        float nameWidth;
+        
+        if (logoObject != null && !logoObject.isEmpty()){
+            contentStream.drawImage(logoObject, 80,700,156,78);
+        }
+        if (firmaObject != null && !firmaObject.isEmpty()){
+            xPosition = (pageWidth - 100)/2;
+            contentStream.drawImage(firmaObject, xPosition,55,110,42);
+
+            contentStream.beginText();
+            contentStream.setFont(calibriBold, 10);
+            contentStream.setNonStrokingColor(Color.BLACK);
+            
+            nameWidth = calibriBold.getStringWidth(instructor) /1000 * 10;            
+            xPosition = (pageWidth - nameWidth)/2 + 9;            
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 55 ));           
+            contentStream.showText(instructor);
+            
+            if (instructor.equalsIgnoreCase("Manuel Anguiano Razón")){
+                nameWidth = calibriBold.getStringWidth(c.registro_manuel) /1000 * 10;            
+                xPosition = (pageWidth - nameWidth)/2 + 9; 
+                contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 40 ));           
+                contentStream.showText(c.registro_manuel);
+            } else if (instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
+                nameWidth = calibriBold.getStringWidth(c.registro_coco) /1000 * 10;            
+                xPosition = (pageWidth - nameWidth)/2 + 9; 
+                contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 40 ));           
+                contentStream.showText(c.registro_coco);
+            } else {
+                nameWidth = calibriBold.getStringWidth(c.registro_jorge) /1000 * 10;            
+                xPosition = (pageWidth - nameWidth)/2 + 9; 
+                contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 40 ));           
+                contentStream.showText(c.registro_jorge);
+            }
+
+            contentStream.endText();
+        }
         
         // Make sure that the content stream is closed:
         contentStream.close();
@@ -1296,6 +1593,42 @@ public class Cdiscisa {
         contentStream2.showText(c.horas_texto);
                
         contentStream2.endText();
+        
+        if (logoObject != null && !logoObject.isEmpty()){
+            contentStream2.drawImage(logoObject, 80,700,156,78);
+        }
+        if (firmaObject != null && !firmaObject.isEmpty()){
+            xPosition = (pageWidth - 100)/2;
+            contentStream2.drawImage(firmaObject, xPosition,55,110,42);
+
+            contentStream2.beginText();
+            contentStream2.setFont(calibriBold, 10);
+            contentStream2.setNonStrokingColor(Color.BLACK);
+            
+            nameWidth = calibriBold.getStringWidth(instructor) /1000 * 10;            
+            xPosition = (pageWidth - nameWidth)/2 + 9;            
+            contentStream2.setTextMatrix(new Matrix(1,0,0,1,xPosition, 55 ));           
+            contentStream2.showText(instructor);
+            
+            if (instructor.equalsIgnoreCase("Manuel Anguiano Razón")){
+                nameWidth = calibriBold.getStringWidth(c.registro_manuel) /1000 * 10;            
+                xPosition = (pageWidth - nameWidth)/2 + 9; 
+                contentStream2.setTextMatrix(new Matrix(1,0,0,1,xPosition, 40 ));           
+                contentStream2.showText(c.registro_manuel);
+            } else if (instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
+                nameWidth = calibriBold.getStringWidth(c.registro_coco) /1000 * 10;            
+                xPosition = (pageWidth - nameWidth)/2 + 9; 
+                contentStream2.setTextMatrix(new Matrix(1,0,0,1,xPosition, 40 ));           
+                contentStream2.showText(c.registro_coco);
+            } else {
+                nameWidth = calibriBold.getStringWidth(c.registro_jorge) /1000 * 10;            
+                xPosition = (pageWidth - nameWidth)/2 + 9; 
+                contentStream2.setTextMatrix(new Matrix(1,0,0,1,xPosition, 40 ));           
+                contentStream2.showText(c.registro_jorge);
+            }
+        }
+            
+            
         contentStream2.close();
         
         //"Capacitacion_BAE_Centro de Huinala_2631_MULTI_19ago2015"
@@ -1312,7 +1645,7 @@ public class Cdiscisa {
         
         
     }
-    private static void imprimirDiplomas_main(ArrayList <Participante> listaParticipantes, Curso c, ArrayList <Directorio> listaDirectorio, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc) throws IOException{
+    private static void imprimirDiplomas_main(ArrayList <Participante> listaParticipantes, Curso c, ArrayList <Directorio> listaDirectorio, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc, String instructor) throws IOException{
         
         ArrayList <Directorio> listaDirecciones = new ArrayList <> ();
         ArrayList <Participante> participantesSucursal = new ArrayList <> ();
@@ -1345,7 +1678,7 @@ public class Cdiscisa {
                     participantesSucursal.add(p1);
                 }
             }
-            imprimirDiplomas(participantesSucursal, c, d, chkDipFirma, chkDipLogo, savePath, dosc);
+            imprimirDiplomas(participantesSucursal, c, d, chkDipFirma, chkDipLogo, savePath, dosc, instructor);
             participantesSucursal.clear();
         }
     }
