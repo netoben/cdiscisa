@@ -1744,12 +1744,14 @@ public class Cdiscisa {
             
             
             try{
+                merge.addSource(new File(lista_auto_pdf));
+                
                 if(registroPDF.equalsIgnoreCase("files/RegistroPCJorge Razon2016.pdf")){
                     merge.addSource(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream(registroPDF));
                 } else{
                     merge.addSource(new File(registroPDF));
                 }
-                merge.addSource(new File(lista_auto_pdf));
+                
                 merge.setDestinationFileName(name);
                 merge.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
             } catch (Exception ex){
