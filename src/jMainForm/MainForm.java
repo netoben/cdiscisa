@@ -152,10 +152,10 @@ public class MainForm extends javax.swing.JFrame {
         passDialog = new PassWordDialog(this, true);
         passDialog.setVisible(true);                        
         logAccess();
+        /*
         
-        
-        /*Testing for new diplomas
-        String[] args = {"/Users/earmenda/Desktop/DirectorioBAE.xlsx","/Users/earmenda/Desktop/test","/Users/earmenda/Desktop/Lista de Asistencia (BAE 1809) 19 01 2016.xlsx","TSI. Jorge Antonio Razón Gil","Manuel Anguiano Razón","true","true","true","true","true","true","true","true","true","true","","/Users/earmenda/Google Drive/Visio-Expressway.pdf"};
+        //Testing for new diplomas
+        String[] args = {"/Users/earmenda/Desktop/DirectorioBAE.xlsx","/Users/earmenda/Desktop/test","/Users/earmenda/Desktop/FormatoCertificado.xlsx","TSI. Jorge Antonio Razón Gil","Manuel Anguiano Razón","false","false","false","true","true","true","false","false","false","false","","/Users/earmenda/Google Drive/Visio-Expressway.pdf"};
         try{
             cdiscisa.Cdiscisa.main(args);
         }catch(Exception ex){
@@ -663,7 +663,7 @@ public class MainForm extends javax.swing.JFrame {
         });
 
         chkRegistro.setFont(new java.awt.Font("Helvetica", 3, 14)); // NOI18N
-        chkRegistro.setText("¿Deseas cambiar el archivo registro de Jorge Razon 2015?");
+        chkRegistro.setText("¿Deseas cambiar el archivo registro de Jorge Razon 2016?");
         chkRegistro.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkRegistroActionPerformed(evt);
@@ -774,18 +774,7 @@ public class MainForm extends javax.swing.JFrame {
         }
         
         System.out.println("response code: " + responseCode);
-        /*
-        File file=null;
-       
-        try {
-            file = new File("./log.txt");
-            
-        }catch(Exception ex){
-             System.out.println("failed to read log file");
-        }
-        
-        
-        */
+
         if (responseCode != 200){
 
             String s = hostname + "%capacitacion%" + formatedDate+"\n";

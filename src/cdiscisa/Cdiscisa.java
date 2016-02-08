@@ -1265,8 +1265,8 @@ public class Cdiscisa {
         contentStream.setFont( helvetica_normal, 8 );
         contentStream.setNonStrokingColor(Color.BLACK);
 
-        charWidth = helvetica_normal.getStringWidth(c.nombre_instructor) /1000 * 8;
-        float x = 140 - charWidth/2;
+        charWidth = helvetica_normal.getStringWidth(c.capacitador) /1000 * 8;
+        float x = 126 - charWidth/2;
                 
         contentStream.setTextMatrix(new Matrix(1,0,0,1,x,228 ));           
         contentStream.showText(c.capacitador); 
@@ -1280,7 +1280,7 @@ public class Cdiscisa {
         }
         
         charWidth = helvetica_normal.getStringWidth(regUnidad) /1000 * 8;
-        x = 140 - charWidth/2 - 12;
+        x = 126 - charWidth/2;
         contentStream.setTextMatrix(new Matrix(1,0,0,1,x,219 ));           
         contentStream.showText(regUnidad); 
         
@@ -1333,25 +1333,25 @@ public class Cdiscisa {
         String contanciaTemplate = "";
         
         switch (c.nombre_curso){
-            case "PREVENCIÓN Y COMBATE DE INCENDIOS I" : contanciaTemplate = "files/certificado_vacio_incendio_basico_nf.pdf";            
+            case "PREVENCIÓN Y COMBATE DE INCENDIOS I" : contanciaTemplate = "files/certificado_vacio_incendio_basico_nf_nl.pdf";            
             break;
-            case "BUSQUEDA Y RESCATE" : contanciaTemplate = "files/certificado_vacio_busq_rescate_nf.pdf";            
+            case "BUSQUEDA Y RESCATE" : contanciaTemplate = "files/certificado_vacio_busq_rescate_nf_nl.pdf";            
             break;
-            case "EVACUACIÓN, BUSQUEDA Y RESCATE" : contanciaTemplate = "files/certificado_vacio_evac_busq_resc_nf.pdf";            
+            case "EVACUACIÓN, BUSQUEDA Y RESCATE" : contanciaTemplate = "files/certificado_vacio_evac_busq_resc_nf_nl.pdf";            
             break;
-            case "EVACUACIÓN" : contanciaTemplate = "files/certificado_vacio_evacuacion_nf.pdf";            
+            case "EVACUACIÓN" : contanciaTemplate = "files/certificado_vacio_evacuacion_nf_nl.pdf";            
             break;
-            case "PREVENCIÓN Y COMBATE DE INCENDIOS II" : contanciaTemplate = "files/certificado_vacio_incendio_intermedio_nf.pdf";            
+            case "PREVENCIÓN Y COMBATE DE INCENDIOS II" : contanciaTemplate = "files/certificado_vacio_incendio_intermedio_nf_nl.pdf";            
             break;
-            case "PREVENCIÓN Y COMBATE DE INCENDIOS III" : contanciaTemplate = "files/certificado_vacio_incendio_avanzado_nf.pdf";            
+            case "PREVENCIÓN Y COMBATE DE INCENDIOS III" : contanciaTemplate = "files/certificado_vacio_incendio_avanzado_nf_nl.pdf";            
             break;
-            case "FORMACION DE BRIGADAS MULTIFUNCIONALES DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi_nf.pdf";            
+            case "FORMACION DE BRIGADAS MULTIFUNCIONALES DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi_nf_nl.pdf";            
             break;
-            case "FORMACIÓN DE BRIGADA MULTIFUNCIONAL DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi_nf.pdf";            
+            case "FORMACIÓN DE BRIGADA MULTIFUNCIONAL DE EMERGENCIA" : contanciaTemplate = "files/certificado_vacio_multi_nf_nl.pdf";            
             break;
-            case "FORMACION DE BRIGADA MULTIFUNCIONAL DE EMERGENCIAS" : contanciaTemplate = "files/certificado_vacio_multi_nf.pdf";      
+            case "FORMACION DE BRIGADA MULTIFUNCIONAL DE EMERGENCIAS" : contanciaTemplate = "files/certificado_vacio_multi_nf_nl.pdf";      
             break;
-            case "PRIMEROS AUXILIOS" : contanciaTemplate = "files/certificado_vacio_primeros_auxilios_nf.pdf";            
+            case "PRIMEROS AUXILIOS" : contanciaTemplate = "files/certificado_vacio_primeros_auxilios_nf_nl.pdf";            
             break;
             default : contanciaTemplate = "files/cerificado_vacio.pdf";
             break;
@@ -1420,33 +1420,33 @@ public class Cdiscisa {
         contentStream.beginText();
         DateFormat df = DateFormat.getDateInstance(DateFormat.LONG, new Locale("es","MX"));
                 
-        contentStream.setFont( calibri, 11 );
+        contentStream.setFont( calibri, 10 );
         contentStream.setNonStrokingColor(Color.BLACK);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1, 418, 661)); 
+        contentStream.setTextMatrix(new Matrix(1,0,0,1, 465, 656)); 
         contentStream.showText(df.format(new Date()));
                 
                 
         contentStream.setFont( calibriBold, 11 );
         
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1, 152 ,(float)590.5)); 
+        contentStream.setTextMatrix(new Matrix(1,0,0,1, 135,585)); 
         contentStream.showText(c.razon_social);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,140, 577));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,120, (float)572.5));           
         contentStream.showText(d.determinante + " " + d.unidad);
         
         float charWidth = calibriBold.getStringWidth(d.direccion) /1000 * 11;
         //System.out.println(charWidth + " " + d.direccion.length() + " " +  d.direccion);
 
         if (charWidth <= 400){
-            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 537));           
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 549));           
             contentStream.showText(d.direccion);
         } else {
-            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 554));           
-            contentStream.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 80)));
-            contentStream.setTextMatrix(new Matrix(1,0,0,1,150, 539));           
-            contentStream.showText(d.direccion.substring(d.direccion.indexOf(" ", 80) + 1, d.direccion.length()));
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 555));           
+            contentStream.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 82)));
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 540));           
+            contentStream.showText(d.direccion.substring(d.direccion.indexOf(" ", 82) + 1, d.direccion.length()));
         }
         
         charWidth = calibriBold.getStringWidth(c.nombre_curso) /1000 * 11;
@@ -1454,13 +1454,13 @@ public class Cdiscisa {
         
         float xPosition = (pageWidth - charWidth)/2;
                 
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 500));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition, 490));           
         contentStream.showText(c.nombre_curso);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,171, (float)475.5));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,160, 465));           
         contentStream.showText(c.fecha_certificado);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,171, (float)461.5));           
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,160, (float)450.5));           
         contentStream.showText(c.horas_texto);
         
         ListIterator <Participante> it = listaParticipantes.listIterator();
@@ -1477,13 +1477,13 @@ public class Cdiscisa {
                 
                 if (charWidth > 165){
                     contentStream.setFont( calibri, 9 );
-                    contentStream.setTextMatrix(new Matrix(1,0,0,1,180,(float)394.8 - y));           
+                    contentStream.setTextMatrix(new Matrix(1,0,0,1,135,(float)376.5 - y));           
                     contentStream.showText(p.nombre + " " + p.apellidos);
                     
                     contentStream.setFont( calibri, 11 );
                     
                 } else{
-                    contentStream.setTextMatrix(new Matrix(1,0,0,1,180, (float)394.8 - y));           
+                    contentStream.setTextMatrix(new Matrix(1,0,0,1,135, (float)376.5 - y));           
                     contentStream.showText(p.nombre + " " + p.apellidos);
                 }
                 
@@ -1492,15 +1492,15 @@ public class Cdiscisa {
                 
                 if (charWidth > 112){
                     contentStream.setFont( calibri, 9 );
-                    contentStream.setTextMatrix(new Matrix(1,0,0,1,360, (float)394.8 - y));           
+                    contentStream.setTextMatrix(new Matrix(1,0,0,1,360, (float)376.5 - y));           
                     contentStream.showText(p.area_puesto);
                 
                 } else {
-                    contentStream.setTextMatrix(new Matrix(1,0,0,1,360, (float)394.8 - y));           
+                    contentStream.setTextMatrix(new Matrix(1,0,0,1,360, (float)376.5 - y));           
                     contentStream.showText(p.area_puesto);
                 }
                 
-                y = y + (float)13.2;
+                y = y + (float)12.7;
                  
             }
         }
@@ -1509,7 +1509,7 @@ public class Cdiscisa {
         float nameWidth;
         
         if (logoObject != null && !logoObject.isEmpty()){
-            contentStream.drawImage(logoObject, 80,700,156,78);
+            contentStream.drawImage(logoObject, 30,700,156,78);
         }
         if (firmaObject != null && !firmaObject.isEmpty()){
             xPosition = (pageWidth - 100)/2;
@@ -1553,29 +1553,29 @@ public class Cdiscisa {
         contentStream2.setFont( calibri, 11 );
         contentStream2.setNonStrokingColor(Color.BLACK);
         
-        contentStream2.setTextMatrix(new Matrix(1,0,0,1, 418, 661)); 
+        contentStream2.setTextMatrix(new Matrix(1,0,0,1, 465, 656)); 
         contentStream2.showText(df.format(new Date()));
                 
                 
         contentStream2.setFont( calibriBold, 11 );
         
-        contentStream2.setTextMatrix(new Matrix(1,0,0,1, 154 ,(float)581.5)); 
+        contentStream2.setTextMatrix(new Matrix(1,0,0,1, 135,585)); 
         contentStream2.showText(c.razon_social);
         
-        contentStream2.setTextMatrix(new Matrix(1,0,0,1,140, 568));           
+        contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, (float)572.5));           
         contentStream2.showText(d.determinante + " " + d.unidad);
         
         charWidth = calibriBold.getStringWidth(d.direccion) /1000 * 11;
         //System.out.println(charWidth + " " + d.direccion.length() + " " +  d.direccion);
 
         if (charWidth <= 400){
-            contentStream2.setTextMatrix(new Matrix(1,0,0,1,150, 537));           
+            contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 549));           
             contentStream2.showText(d.direccion);
         } else {
-            contentStream2.setTextMatrix(new Matrix(1,0,0,1,150, 552));           
-            contentStream2.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 80)));
-            contentStream2.setTextMatrix(new Matrix(1,0,0,1,150, 539));           
-            contentStream2.showText(d.direccion.substring(d.direccion.indexOf(" ", 80) + 1, d.direccion.length()));
+            contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 555));           
+            contentStream2.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 82)));
+            contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 540));           
+            contentStream2.showText(d.direccion.substring(d.direccion.indexOf(" ", 82) + 1, d.direccion.length()));
         }
         
         charWidth = calibriBold.getStringWidth(c.nombre_curso) /1000 * 11;
@@ -1583,19 +1583,19 @@ public class Cdiscisa {
         pageWidth = page2.getMediaBox().getWidth();
         xPosition = (pageWidth - charWidth)/2;
                 
-        contentStream2.setTextMatrix(new Matrix(1,0,0,1,xPosition, 487));           
+        contentStream2.setTextMatrix(new Matrix(1,0,0,1,xPosition, 490));           
         contentStream2.showText(c.nombre_curso);
         
-        contentStream2.setTextMatrix(new Matrix(1,0,0,1,171, 467));           
+        contentStream2.setTextMatrix(new Matrix(1,0,0,1,160, 465));           
         contentStream2.showText(c.fecha_certificado);
         
-        contentStream2.setTextMatrix(new Matrix(1,0,0,1,171, 454));           
+        contentStream2.setTextMatrix(new Matrix(1,0,0,1,160, (float)450.5));           
         contentStream2.showText(c.horas_texto);
                
         contentStream2.endText();
         
         if (logoObject != null && !logoObject.isEmpty()){
-            contentStream2.drawImage(logoObject, 80,700,156,78);
+            contentStream2.drawImage(logoObject, 30,700,156,78);
         }
         if (firmaObject != null && !firmaObject.isEmpty()){
             xPosition = (pageWidth - 100)/2;
@@ -1626,6 +1626,7 @@ public class Cdiscisa {
                 contentStream2.setTextMatrix(new Matrix(1,0,0,1,xPosition, 40 ));           
                 contentStream2.showText(c.registro_jorge);
             }
+            contentStream2.endText();
         }
             
             
@@ -1743,7 +1744,7 @@ public class Cdiscisa {
             
             
             try{
-                if(registroPDF.equalsIgnoreCase("files/registro_jorge_2015.pdf")){
+                if(registroPDF.equalsIgnoreCase("files/RegistroPCJorge Razon2016.pdf")){
                     merge.addSource(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream(registroPDF));
                 } else{
                     merge.addSource(new File(registroPDF));

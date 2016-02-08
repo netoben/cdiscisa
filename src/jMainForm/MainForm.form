@@ -743,7 +743,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Helvetica" size="14" style="3"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="&#xbf;Deseas cambiar el archivo registro de Jorge Razon 2015?"/>
+            <Property name="text" type="java.lang.String" value="&#xbf;Deseas cambiar el archivo registro de Jorge Razon 2016?"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkRegistroActionPerformed"/>
