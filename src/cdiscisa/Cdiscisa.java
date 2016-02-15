@@ -42,10 +42,12 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.swing.JOptionPane;
@@ -61,14 +63,25 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 class Directorio {
 String determinante,formato,unidad,estado,municipio,direccion;
+String razon_social, sucursal, nombre_comercial,dirección_fiscal, RFC,telefono, nombre_contacto,mail_envio_constancias,	mail_cco,notas;
 
 public Directorio(){
-    this.determinante = "";
-    this.direccion = "";
+    this.determinante = ""; // o número de cliente
+    this.direccion = ""; 
     this.estado = "";
     this.formato = "";
     this.municipio = "";
-    this.unidad = "";
+    this.razon_social = "";
+    this.sucursal = "";
+    this.nombre_comercial = "";
+    this.dirección_fiscal = "";
+    this.RFC = "";
+    this.telefono = "";
+    this.nombre_contacto = "";
+    this.mail_envio_constancias = "";
+    this.mail_cco = "";
+    this.notas = "";
+    
 }
 
 }
@@ -92,6 +105,7 @@ class Curso{
     String nombre_empresa, nombre_curso, nombre_instructor,horas_texto,fecha_texto_diploma;
     String razon_social,rfc_empresa, fecha_certificado, capacitador, uCapacitadora, registro_jorge,registro_coco,registro_manuel;
     int horas;
+    boolean walmart;
     Date fecha_inicio,fecha_termino;
     
     public Curso() {
@@ -112,6 +126,7 @@ class Curso{
         this.registro_coco = "DPC-ENL-I-103_2015";
         this.registro_manuel = "DPC-ENL-I-056_2016";
         this.registro_jorge = "DPC-ENL-CE-002/2016";
+        this.walmart = true;
     }
 }
 
@@ -139,7 +154,7 @@ public class Cdiscisa {
         //Workbook wbLista = WorkbookFactory.create(new File("src/files/FormatoCertificado.xlsx"));
         //Workbook wbDirectorio = WorkbookFactory.create(new File("src/files/DirectorioBAE.xlsx"));
         Workbook wbDirectorio = null, wbLista;
-     
+        
         //file = (BufferedInputStream)cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/DC3_base_firma.pdf");
        
         //JOptionPane.showMessageDialog(null, "directorio " + args[0] +  " Lista : " + args[2]);
@@ -189,8 +204,20 @@ public class Cdiscisa {
         }
         
         ArrayList <Directorio> listaDirectorio = null;
+        Map<String, String> abreviaturas = new HashMap<>();
+
         ArrayList <Participante> listaParticipantes = null;
         Curso c = null;
+        
+        Workbook wbAbrev = WorkbookFactory.create(new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/abrev_cursos.xlsx").getFile()));
+        
+        try{            
+            abreviaturas = llenarAbreviaturas(wbAbrev);
+            
+        } catch(Exception ex){
+            JOptionPane.showMessageDialog(null, "Hubo un error leyendo el archivo de abreviaturas, es posible que contenga celdas faltantes o mal formadas");
+            return;
+        }
         
         try{
             listaDirectorio = llenarDirectorio(wbDirectorio);
@@ -214,25 +241,41 @@ public class Cdiscisa {
         Map<String,String> dosc = new HashMap<>();
         
         if (args[5].equalsIgnoreCase("true")){ //check if diploma checkbox is checked    
-            imprimirDiplomas_main(listaParticipantes, c, listaDirectorio, args[6], args[7], args[1], dosc, args[4]);    // args 6 y 7 son firma y logo respectivamente      
+            imprimirDiplomas_main(listaParticipantes, c, listaDirectorio, args[6], args[7], args[1], dosc, args[4], abreviaturas);    // args 6 y 7 son firma y logo respectivamente      
         }
         
         if (args[8].equalsIgnoreCase("true")){            
-            imprimirConstancias(listaParticipantes, c, listaDirectorio, args[9], args[10], args[1], dosc, args[4]);
+            imprimirConstancias(listaParticipantes, c, listaDirectorio, args[9], args[10], args[1], dosc, args[4], abreviaturas);
         }
         
         if (args[11].equalsIgnoreCase("true")){            
-            imprimirDC3(listaParticipantes,c, args[12], args[13], args[1], dosc);
+            imprimirDC3(listaParticipantes,c, args[12], args[13], args[1], dosc, abreviaturas);
         }
         
         if (args[14].equalsIgnoreCase("true")){            
-            mergeFiles(dosc,listaParticipantes,listaDirectorio, nameRegistro, args[16] );
+            mergeFiles(dosc,listaParticipantes,listaDirectorio, nameRegistro, args[16]);
         }
         
         JOptionPane.showMessageDialog(null, "Los documentos se han generado exitosamente");
 
     }
-    
+    private static Map<String, String> llenarAbreviaturas(Workbook wbAbrev){
+        Map<String, String> abreviaturas = new HashMap<>();        
+        Sheet wbListaSheet = wbAbrev.getSheetAt(0);
+        Iterator<Row> rowIterator = wbListaSheet.iterator();
+        Row row = null; 
+        
+        while (rowIterator.hasNext()){
+            row = rowIterator.next();
+            if(row.getCell(0) == null || row.getCell(0).toString().isEmpty())
+            {break;} else{
+                abreviaturas.put(row.getCell(0).getStringCellValue().trim(), row.getCell(1).getStringCellValue().trim());
+            }            
+        }
+        
+        return abreviaturas;
+        
+    }
     private static Curso llenarCurso (Workbook wbLista, String unidadCapacitadora, String instructor) throws Exception{
         
         Sheet wbListaSheet = wbLista.getSheetAt(0);
@@ -279,6 +322,9 @@ public class Cdiscisa {
         if (!(wbListaSheet.getRow(11) == null || wbListaSheet.getRow(11).getCell(4) == null || wbListaSheet.getRow(11).getCell(4).getStringCellValue().isEmpty())  ){
             try{
                 c.razon_social = wbListaSheet.getRow(11).getCell(4).getStringCellValue();
+                if (!c.razon_social.equalsIgnoreCase("NUEVA WALMART DE MEXICO S DE RL DE CV")){
+                    c.walmart = false;
+                }
             }catch (Exception ex){
                 JOptionPane.showMessageDialog(null, "La casilla de Razón Social de la empresa en la Lista de Participantes parece tener datos no válidos"); 
                 throw new netoCustomException("Error al leer los datos del curso");
@@ -326,7 +372,11 @@ public class Cdiscisa {
         Calendar cal = Calendar.getInstance();
         
         if (!(wbListaSheet.getRow(4) == null || wbListaSheet.getRow(4).getCell(6) == null)){
-            cal.set(Calendar.DAY_OF_MONTH, (int)wbListaSheet.getRow(4).getCell(6).getNumericCellValue());
+            if (wbListaSheet.getRow(4).getCell(6).getCellType() == 1){
+                cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(wbListaSheet.getRow(4).getCell(6).getStringCellValue()));                
+            } else{
+                cal.set(Calendar.DAY_OF_MONTH, (int)wbListaSheet.getRow(4).getCell(6).getNumericCellValue());
+            }
          }
         if (!(wbListaSheet.getRow(6) == null || wbListaSheet.getRow(6).getCell(6) == null)){
             cal.set(Calendar.MONTH, Integer.parseInt(wbListaSheet.getRow(6).getCell(6).getStringCellValue())-1);
@@ -338,7 +388,11 @@ public class Cdiscisa {
         c.fecha_inicio  = cal.getTime();
         
         if (!(wbListaSheet.getRow(4) == null || wbListaSheet.getRow(4).getCell(7) == null)){
-            cal.set(Calendar.DAY_OF_MONTH, (int)wbListaSheet.getRow(4).getCell(7).getNumericCellValue());
+            if (wbListaSheet.getRow(4).getCell(7).getCellType() == 1){
+                cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(wbListaSheet.getRow(4).getCell(7).getStringCellValue()));
+            }else{
+                cal.set(Calendar.DAY_OF_MONTH, (int)wbListaSheet.getRow(4).getCell(7).getNumericCellValue());
+            }
          }
         if (!(wbListaSheet.getRow(6) == null || wbListaSheet.getRow(6).getCell(7) == null)){
             cal.set(Calendar.MONTH, Integer.parseInt(wbListaSheet.getRow(6).getCell(7).getStringCellValue())-1);
@@ -459,44 +513,93 @@ public class Cdiscisa {
         Sheet wbListaSheet = wbDirectorio.getSheetAt(0);
         Iterator<Row> rowIterator = wbListaSheet.iterator();
         
-        if (rowIterator.hasNext()){
-            rowIterator.next();
-        }
-        
         Row row = null; 
         Directorio d = null;
+        boolean walmart = true;
+        
+        if (rowIterator.hasNext()){
+            row = rowIterator.next();
+            if (row.getCell(0) != null && !row.getCell(0).toString().equalsIgnoreCase("Det.") )
+            {
+                walmart = false;
+            } 
+            
+        }
         
         while(rowIterator.hasNext()){
         
             row = rowIterator.next();
             
             try{
-            if (row.getCell(0) == null || row.getCell(0).toString().isEmpty() )
-            {break;}
+                
+                if (walmart && (row.getCell(0) == null || row.getCell(0).toString().isEmpty()) ){
+                    break;
+                } else if(row.getCell(0) == null || row.getCell(0).toString().isEmpty()){
+                    continue;                                             
+                }
+                
+                
+                d = new Directorio();
+
+                if (row.getCell(0) != null){
+                    row.getCell(0).setCellType(Cell.CELL_TYPE_STRING);
+                    d.determinante = row.getCell(0).getStringCellValue().trim();
+                }
+
+                if (row.getCell(1) != null){   
+                    if (walmart){
+                        d.formato= row.getCell(1).getStringCellValue().trim();
+                    } else
+                    {
+                        d.razon_social= row.getCell(1).getStringCellValue().trim();
+                    }
+                }
+
+                if (row.getCell(2) != null){    
+                    if (walmart){
+                        d.unidad = row.getCell(2).getStringCellValue().trim();
+                    }else{
+                        d.sucursal = row.getCell(2).getStringCellValue().trim();
+                    }
+                }
+
+                if (row.getCell(3) != null){                     
+                    d.estado = row.getCell(3).getStringCellValue().trim();
+                }
+                if (row.getCell(4) != null){                     
+                    d.municipio = row.getCell(4).getStringCellValue().trim();
+                }
+                if (row.getCell(5) != null){                     
+                    d.direccion = row.getCell(5).getStringCellValue().trim();
+                }
+                
+                if (!walmart){
+                    if (row.getCell(6) != null){                     
+                        d.nombre_comercial = row.getCell(6).getStringCellValue().trim();
+                    }
+                    if (row.getCell(7) != null){                     
+                        d.dirección_fiscal = row.getCell(7).getStringCellValue().trim();
+                    }
+                    if (row.getCell(8) != null){                     
+                        d.RFC = row.getCell(8).getStringCellValue().trim();
+                    }
+                    if (row.getCell(9) != null){                     
+                        d.telefono = row.getCell(9).getStringCellValue().trim();
+                    }
+                    if (row.getCell(10) != null){                     
+                        d.nombre_contacto = row.getCell(10).getStringCellValue().trim();
+                    }
+                    if (row.getCell(11) != null){                     
+                        d.mail_envio_constancias = row.getCell(11).getStringCellValue().trim();
+                    }
+                    if (row.getCell(12) != null){                     
+                        d.mail_cco = row.getCell(12).getStringCellValue().trim();
+                    }
+                    if (row.getCell(13) != null){                     
+                        d.notas = row.getCell(13).getStringCellValue().trim();
+                    }
+                }
             
-            d = new Directorio();
-            
-            if (row.getCell(0) != null){
-                row.getCell(0).setCellType(Cell.CELL_TYPE_STRING);
-                d.determinante = row.getCell(0).getStringCellValue().trim();
-            }
-            
-            if (row.getCell(1) != null){                 
-                d.formato= row.getCell(1).getStringCellValue().trim();
-            }
-            
-            if (row.getCell(2) != null){                     
-                d.unidad = row.getCell(2).getStringCellValue().trim();
-            }
-            if (row.getCell(3) != null){                     
-                d.estado = row.getCell(3).getStringCellValue().trim();
-            }
-            if (row.getCell(4) != null){                     
-                d.municipio = row.getCell(4).getStringCellValue().trim();
-            }
-            if (row.getCell(4) != null){                     
-                d.direccion = row.getCell(5).getStringCellValue().trim();
-            }
             }catch(Exception ex){
                 JOptionPane.showMessageDialog(null, "Error leyendo la determinante " + d.determinante + " " + d.unidad); 
             }
@@ -506,12 +609,14 @@ public class Cdiscisa {
         
         return listaDirectorio;
     }
-    private static void imprimirDiplomas(ArrayList <Participante> listaParticipantes, Curso c, Directorio d, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc, String instructor) throws IOException{
+    private static void imprimirDiplomas(ArrayList <Participante> listaParticipantes, Curso c, Directorio d, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc, String instructor, Map<String, String> abreviaturas) throws IOException{
           
         ListIterator <Participante> it = listaParticipantes.listIterator();
         Participante p1 = null;
         Participante p2 = null;
-        
+        String abrev_curso = "";
+
+
         // Create a document and add a page to it
         PDDocument document = new PDDocument();
         PDDocument documentSingle;
@@ -634,12 +739,18 @@ public class Cdiscisa {
         
         Format formatter = new SimpleDateFormat("ddMMMYYYY");
         String formatedDate = formatter.format(c.fecha_inicio);
-    
         
-        document.save(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_MULTI_" + formatedDate + ".pdf");
-        document.close();
+        String abrev = abreviaturas.get(c.nombre_curso);
         
-        dosc.put(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_MULTI_" + formatedDate + ".pdf",d.determinante);
+        if (c.walmart){
+            document.save(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");
+            document.close();        
+            dosc.put(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf",d.determinante);
+        }else{
+            document.save(savePath + File.separator + "Diplomas_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");
+            document.close();        
+            dosc.put(savePath + File.separator + "Diplomas_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf",d.determinante);
+        }
     }
     private static void imprimirDiplomaArriba(Participante p1, Curso c, Directorio d, PDDocument document, PDPage page, PDFont calibri, PDFont calibriBold, PDFont pristina, PDImageXObject logoObject, PDImageXObject firmaObject, String instructor) throws IOException{
         
@@ -653,7 +764,7 @@ public class Cdiscisa {
         PDPageContentStream contentStream = new PDPageContentStream(document, newPage, true, true);
 
         float pageWidth = newPage.getMediaBox().getWidth();
-        float pageHeight = newPage.getMediaBox().getHeight();
+        //float pageHeight = newPage.getMediaBox().getHeight();
         
         //System.out.println("pageWidth: " + pageWidth + "\npageHeight: " + pageHeight);
 
@@ -665,12 +776,20 @@ public class Cdiscisa {
         
         float nameWidth = pristina.getStringWidth(p1.nombre + " " + p1.apellidos) /1000 * 28;
         
-        //System.out.println("nameWidth: " + nameWidth);
+        //System.out.println(p1.nombre + " " + p1.apellidos + "::" + nameWidth);
         
-        float xPosition = (pageWidth - nameWidth)/2;
-        
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,641 ));           
-        contentStream.showText(p1.nombre + " " + p1.apellidos);
+        float xPosition;
+        if (nameWidth < 470){
+            xPosition = (pageWidth - nameWidth)/2;
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,641 ));           
+            contentStream.showText(p1.nombre + " " + p1.apellidos);
+        } else{
+            contentStream.setFont( pristina, 22 );
+            nameWidth = pristina.getStringWidth(p1.nombre + " " + p1.apellidos) /1000 * 22;
+            xPosition = (pageWidth - nameWidth)/2;
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,641 ));           
+            contentStream.showText(p1.nombre + " " + p1.apellidos);
+        }
         
         contentStream.setFont( calibri, 15 );
         contentStream.setNonStrokingColor(Color.BLACK);
@@ -686,7 +805,18 @@ public class Cdiscisa {
         contentStream.setNonStrokingColor(Color.BLACK);
          
         contentStream.setTextMatrix(new Matrix(1,0,0,1,255, 593));           
-        contentStream.showText(p1.determinante + " " + d.unidad);
+        if (c.walmart){
+            contentStream.showText(p1.determinante + " " + d.unidad);
+        } else if (d.sucursal.isEmpty() || d.sucursal.equalsIgnoreCase("")){
+            contentStream.endText();
+            contentStream.addRect(100, 590, 400, 20);
+            contentStream.setNonStrokingColor(Color.WHITE);
+            contentStream.fill();
+            contentStream.beginText();
+            contentStream.setNonStrokingColor(Color.BLACK);
+        } else{
+            contentStream.showText(d.sucursal);
+        }
          
         contentStream.setTextMatrix(new Matrix(1,0,0,1,210, (float)538.5));           
         contentStream.showText(c.horas_texto);
@@ -800,7 +930,7 @@ public class Cdiscisa {
         PDPageContentStream contentStream = new PDPageContentStream(document, newPage, true, true);
                 
         float pageWidth = newPage.getMediaBox().getWidth();
-        float pageHeight = newPage.getMediaBox().getHeight();
+        //float pageHeight = newPage.getMediaBox().getHeight();
         
         //System.out.println("pageWidth: " + pageWidth + "\npageHeight: " + pageHeight);
 
@@ -813,12 +943,20 @@ public class Cdiscisa {
         
         float nameWidth = pristina.getStringWidth(p1.nombre + " " + p1.apellidos) /1000 * 28;
         
-        //System.out.println("nameWidth: " + nameWidth);
-        
-        float xPosition = (pageWidth - nameWidth)/2 + 15;
-        
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,641 ));           
-        contentStream.showText(p1.nombre + " " + p1.apellidos);
+        //System.out.println(p1.nombre + " " + p1.apellidos + "::" + nameWidth);
+
+        float xPosition;
+        if (nameWidth < 470){
+            xPosition = (pageWidth - nameWidth)/2;
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,641 ));           
+            contentStream.showText(p1.nombre + " " + p1.apellidos);
+        } else{
+            contentStream.setFont( pristina, 22 );
+            nameWidth = pristina.getStringWidth(p1.nombre + " " + p1.apellidos) /1000 * 22;
+            xPosition = (pageWidth - nameWidth)/2;
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,641 ));           
+            contentStream.showText(p1.nombre + " " + p1.apellidos);
+        }
         
         contentStream.setFont( calibri, 15 );
         contentStream.setNonStrokingColor(Color.BLACK);
@@ -832,9 +970,21 @@ public class Cdiscisa {
         
         contentStream.setFont( calibri, 11 );
         contentStream.setNonStrokingColor(Color.BLACK);
-         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,275, 593));           
-        contentStream.showText(p1.determinante + " " + d.unidad);
+        
+        if (c.walmart){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,275, 593)); 
+            contentStream.showText(p1.determinante + " " + d.unidad);
+        } else if (d.sucursal.isEmpty() || d.sucursal.equalsIgnoreCase("")){
+            contentStream.endText();
+            contentStream.addRect(100, 590, 400, 20);
+            contentStream.setNonStrokingColor(Color.WHITE);
+            contentStream.fill();
+            contentStream.beginText();
+            contentStream.setNonStrokingColor(Color.BLACK);
+        } else{
+            contentStream.showText(d.sucursal);
+        }
+        
         
         contentStream.setTextMatrix(new Matrix(1,0,0,1,210,(float)538.5));           
         contentStream.showText(c.horas_texto);
@@ -919,12 +1069,20 @@ public class Cdiscisa {
         
         nameWidth = pristina.getStringWidth(p2.nombre + " " + p2.apellidos) /1000 * 28;
         
-        //System.out.println("nameWidth: " + nameWidth);
+        //System.out.println(p2.nombre + " " + p2.apellidos + "::" + nameWidth);
+       
+        if (nameWidth < 470){
+            xPosition = (pageWidth - nameWidth)/2;
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,262 ));           
+            contentStream.showText(p2.nombre + " " + p2.apellidos);
+        } else{
+            contentStream.setFont( pristina, 22 );
+            nameWidth = pristina.getStringWidth(p2.nombre + " " + p2.apellidos) /1000 * 22;
+            xPosition = (pageWidth - nameWidth)/2;
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,262 ));           
+            contentStream.showText(p2.nombre + " " + p2.apellidos);
+        }
         
-        xPosition = (pageWidth - nameWidth)/2;
-        
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,xPosition,262 ));          
-        contentStream.showText(p2.nombre + " " + p2.apellidos);
         
         contentStream.setFont( calibri, 15 );
         contentStream.setNonStrokingColor(Color.BLACK);
@@ -938,9 +1096,21 @@ public class Cdiscisa {
         
         contentStream.setFont( calibri, 11 );
         contentStream.setNonStrokingColor(Color.BLACK);
-         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,275, (float) 213.4));           
-        contentStream.showText(p2.determinante + " " + d.unidad);
+               
+        if (c.walmart){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,275, (float) 213.4)); 
+            contentStream.showText(p2.determinante + " " + d.unidad);
+        } else if (d.sucursal.isEmpty() || d.sucursal.equalsIgnoreCase("")){
+            contentStream.endText();
+            contentStream.addRect(100, 211, 400, 20);
+            contentStream.setNonStrokingColor(Color.WHITE);
+            contentStream.fill();
+            contentStream.beginText();
+            contentStream.setNonStrokingColor(Color.BLACK);
+        } else{
+            contentStream.showText(d.sucursal);
+        }
+        
         
         contentStream.setTextMatrix(new Matrix(1,0,0,1,210,159));           
         contentStream.showText(c.horas_texto);
@@ -1022,19 +1192,19 @@ public class Cdiscisa {
         //document.save( "DiplomaSoloTest.pdf");
         //document.close();
     }
-    private static void imprimirDC3(ArrayList <Participante> listaParticipantes, Curso c, String chkDC3Firmaa, String chkDC3Logoa, String savePath,  Map<String,String> dosc) throws IOException{   
+    private static void imprimirDC3(ArrayList <Participante> listaParticipantes, Curso c, String chkDC3Firmaa, String chkDC3Logoa, String savePath,  Map<String,String> dosc, Map<String, String> abreviaturas) throws IOException{   
         
         ListIterator <Participante> it = listaParticipantes.listIterator();
         Participante p;
         while(it.hasNext()){
             p = it.next();
             if (p.aprovado){
-            imprimirDC3_individual(p,c, chkDC3Firmaa, chkDC3Logoa, savePath, dosc);
+            imprimirDC3_individual(p,c, chkDC3Firmaa, chkDC3Logoa, savePath, dosc, abreviaturas);
             }
         }  
           
     }
-    private static void imprimirDC3_individual(Participante p,Curso c, String chkDC3Firmaa, String chkDC3Logoa, String savePath, Map<String,String> dosc) throws IOException {
+    private static void imprimirDC3_individual(Participante p,Curso c, String chkDC3Firmaa, String chkDC3Logoa, String savePath, Map<String,String> dosc, Map<String, String> abreviaturas) throws IOException {
         
         //JOptionPane.showMessageDialog(null, "entrando a imrpimir individual");
         PDDocument document;
@@ -1290,16 +1460,18 @@ public class Cdiscisa {
         contentStream.close();
         Format formatter = new SimpleDateFormat("ddMMMYYYY");
         String formatedDate = formatter.format(c.fecha_inicio);
-    
-        // Save the results and ensure that the document is properly closed:
-        document.save(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + formatedDate + ".pdf");
-        document.close();
         
-        dosc.put(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + formatedDate + ".pdf", p.determinante);
+        String abrev = abreviaturas.get(c.nombre_curso);
+        
+        // Save the results and ensure that the document is properly closed:
+        
+        document.save(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + abrev + "_" + formatedDate + ".pdf");
+        document.close();        
+        dosc.put(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + abrev + "_" + formatedDate + ".pdf", p.determinante);
         
         
     }
-    private static void imprimirConstancias(ArrayList <Participante> listaParticipantes, Curso c, ArrayList <Directorio> listaDirectorio, String chkConstFirma, String chkConstLogo, String savePath, Map<String,String> dosc, String instructor) throws IOException {
+    private static void imprimirConstancias(ArrayList <Participante> listaParticipantes, Curso c, ArrayList <Directorio> listaDirectorio, String chkConstFirma, String chkConstLogo, String savePath, Map<String,String> dosc, String instructor, Map<String, String> abreviaturas) throws IOException {
         
         
         ArrayList <Directorio> listaDirecciones = new ArrayList <> ();
@@ -1324,11 +1496,11 @@ public class Cdiscisa {
         ListIterator <Directorio> itDireccionesConstancia = listaDirecciones.listIterator(); 
         while (itDireccionesConstancia.hasNext()){
             Directorio d = itDireccionesConstancia.next();
-            imprimirUnaConstancia(listaParticipantes, c, d, chkConstFirma, chkConstLogo, savePath, dosc, instructor);
+            imprimirUnaConstancia(listaParticipantes, c, d, chkConstFirma, chkConstLogo, savePath, dosc, instructor, abreviaturas);
         }
       
     }
-    private static void imprimirUnaConstancia(ArrayList <Participante> listaParticipantes, Curso c, Directorio d, String chkConstFirma, String chkConstLogo, String savePath, Map<String,String> dosc, String instructor) throws IOException {
+    private static void imprimirUnaConstancia(ArrayList <Participante> listaParticipantes, Curso c, Directorio d, String chkConstFirma, String chkConstLogo, String savePath, Map<String,String> dosc, String instructor, Map<String, String> abreviaturas) throws IOException {
         
         String contanciaTemplate = "";
         
@@ -1420,7 +1592,7 @@ public class Cdiscisa {
         contentStream.beginText();
         DateFormat df = DateFormat.getDateInstance(DateFormat.LONG, new Locale("es","MX"));
                 
-        contentStream.setFont( calibri, 10 );
+        contentStream.setFont( calibri, 9 );
         contentStream.setNonStrokingColor(Color.BLACK);
         
         contentStream.setTextMatrix(new Matrix(1,0,0,1, 465, 656)); 
@@ -1433,8 +1605,42 @@ public class Cdiscisa {
         contentStream.setTextMatrix(new Matrix(1,0,0,1, 135,585)); 
         contentStream.showText(c.razon_social);
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,120, (float)572.5));           
-        contentStream.showText(d.determinante + " " + d.unidad);
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,120, (float)572.5)); 
+        if (c.walmart){
+            contentStream.showText(d.determinante + " " + d.unidad);            
+        } else if (d.sucursal.isEmpty() || d.sucursal.equalsIgnoreCase("")){
+            contentStream.endText();
+            contentStream.addRect(30, 572, 150, 10);
+            contentStream.setNonStrokingColor(Color.WHITE);
+            contentStream.fill();
+            contentStream.beginText();
+            contentStream.setNonStrokingColor(Color.BLACK);
+        } else{
+            contentStream.showText(d.sucursal);                                   
+        }   
+        
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 527)); 
+        contentStream.showText(d.RFC);
+        contentStream.setFont(calibri, 11);
+        contentStream.setTextMatrix(new Matrix(1,0,0,1,72, 527)); 
+        contentStream.showText("RFC: ");
+        contentStream.setFont( calibriBold, 11 ); 
+            
+        /*
+        if (c.walmart){
+            contentStream.showText(p1.determinante + " " + d.unidad);
+        } else if (d.sucursal.isEmpty() || d.sucursal.equalsIgnoreCase("")){
+            contentStream.endText();
+            contentStream.addRect(100, 590, 400, 20);
+            contentStream.setNonStrokingColor(Color.WHITE);
+            contentStream.fill();
+            contentStream.beginText();
+            contentStream.setNonStrokingColor(Color.BLACK);
+        } else{
+            contentStream.showText(d.sucursal);
+        }
+        
+        */
         
         float charWidth = calibriBold.getStringWidth(d.direccion) /1000 * 11;
         //System.out.println(charWidth + " " + d.direccion.length() + " " +  d.direccion);
@@ -1443,9 +1649,9 @@ public class Cdiscisa {
             contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 549));           
             contentStream.showText(d.direccion);
         } else {
-            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 555));           
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 552));           
             contentStream.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 82)));
-            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 540));           
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 541));           
             contentStream.showText(d.direccion.substring(d.direccion.indexOf(" ", 82) + 1, d.direccion.length()));
         }
         
@@ -1563,7 +1769,17 @@ public class Cdiscisa {
         contentStream2.showText(c.razon_social);
         
         contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, (float)572.5));           
-        contentStream2.showText(d.determinante + " " + d.unidad);
+        if (c.walmart){
+            contentStream2.showText(d.determinante + " " + d.unidad);            
+        } else{
+            contentStream2.showText(d.sucursal);
+            contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 527)); 
+            contentStream2.showText(d.RFC);
+            contentStream2.setFont(calibri, 11);
+            contentStream2.setTextMatrix(new Matrix(1,0,0,1,73, 527)); 
+            contentStream2.showText("RFC: ");      
+            contentStream2.setFont( calibriBold, 11 );
+        }        
         
         charWidth = calibriBold.getStringWidth(d.direccion) /1000 * 11;
         //System.out.println(charWidth + " " + d.direccion.length() + " " +  d.direccion);
@@ -1638,15 +1854,22 @@ public class Cdiscisa {
        
         Format formatter = new SimpleDateFormat("ddMMMYYYY");
         String formatedDate = formatter.format(c.fecha_inicio);
-    
-        // Save the results and ensure that the document is properly closed:
-        document.save(savePath + File.separator + "Certificado_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_MULTI_" + formatedDate + ".pdf");
-        document.close();
-        dosc.put(savePath + File.separator + "Certificado_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_MULTI_" + formatedDate + ".pdf", d.determinante);
         
+        String abrev = abreviaturas.get(c.nombre_curso);
+        
+        // Save the results and ensure that the document is properly closed:
+        if(c.walmart){
+            document.save(savePath + File.separator + "Certificado_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");
+            document.close();
+            dosc.put(savePath + File.separator + "Certificado_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf", d.determinante);
+        }else{
+            document.save(savePath + File.separator + "Certificado_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");
+            document.close();
+            dosc.put(savePath + File.separator + "Certificado_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf", d.determinante);
+        }
         
     }
-    private static void imprimirDiplomas_main(ArrayList <Participante> listaParticipantes, Curso c, ArrayList <Directorio> listaDirectorio, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc, String instructor) throws IOException{
+    private static void imprimirDiplomas_main(ArrayList <Participante> listaParticipantes, Curso c, ArrayList <Directorio> listaDirectorio, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc, String instructor, Map<String, String> abreviaturas) throws IOException{
         
         ArrayList <Directorio> listaDirecciones = new ArrayList <> ();
         ArrayList <Participante> participantesSucursal = new ArrayList <> ();
@@ -1679,7 +1902,7 @@ public class Cdiscisa {
                     participantesSucursal.add(p1);
                 }
             }
-            imprimirDiplomas(participantesSucursal, c, d, chkDipFirma, chkDipLogo, savePath, dosc, instructor);
+            imprimirDiplomas(participantesSucursal, c, d, chkDipFirma, chkDipLogo, savePath, dosc, instructor, abreviaturas);
             participantesSucursal.clear();
         }
     }
