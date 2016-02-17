@@ -1322,13 +1322,13 @@ public class Cdiscisa {
         contentStream.setTextMatrix(new Matrix(1,0,0,1,30,381 ));           
         contentStream.showText(c.horas_texto);
         
-        if (c.walmart){
+        //if (c.walmart){
             contentStream.setTextMatrix(new Matrix(1,0,0,1,30,356 ));           
             contentStream.showText("6000 SEGURIDAD");
-        } else{
-            contentStream.setTextMatrix(new Matrix(1,0,0,1,30,356 ));           
-            contentStream.showText(p.area_tematica);
-        }
+        //} else{
+        //    contentStream.setTextMatrix(new Matrix(1,0,0,1,30,356 ));           
+        //    contentStream.showText(p.area_tematica);
+        //}
         
         contentStream.setTextMatrix(new Matrix(1,0,0,1,30,332 ));           
         contentStream.showText(c.uCapacitadora);
