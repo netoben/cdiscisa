@@ -779,10 +779,18 @@ public class MainForm extends javax.swing.JFrame {
 
             String s = hostname + "%capacitacion%" + formatedDate+"\n";
             
-            Files.write(Paths.get("./log.txt"), s.getBytes(), StandardOpenOption.APPEND);
+            File file = new File(System.getProperty("user.dir") + File.separator + "log.txt");
+            if(file.exists() && !file.isDirectory()) {
+                Files.write(Paths.get(System.getProperty("user.dir") + File.separator + "log.txt"), s.getBytes(), StandardOpenOption.APPEND);
+            }
+            
  
         } else {
-            File file = new File("./log.txt");
+            
+            File file = new File(System.getProperty("user.dir") + File.separator + "log.txt");
+            if(!file.exists()) {
+                file.createNewFile();
+            }
             
             BufferedReader br = new BufferedReader(new FileReader(file));     
             

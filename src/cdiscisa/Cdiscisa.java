@@ -42,12 +42,10 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.swing.JOptionPane;
@@ -322,7 +320,7 @@ public class Cdiscisa {
         if (!(wbListaSheet.getRow(11) == null || wbListaSheet.getRow(11).getCell(4) == null || wbListaSheet.getRow(11).getCell(4).getStringCellValue().isEmpty())  ){
             try{
                 c.razon_social = wbListaSheet.getRow(11).getCell(4).getStringCellValue();
-                if (!c.razon_social.equalsIgnoreCase("NUEVA WALMART DE MEXICO S DE RL DE CV")){
+                if (!c.razon_social.equalsIgnoreCase("NUEVA WAL‐MART DE MEXICO S DE RL DE C.V.") && !c.razon_social.equalsIgnoreCase("NUEVA WAL-MART DE MEXICO S DE RL DE C.V.")){
                     c.walmart = false;
                 }
             }catch (Exception ex){
@@ -434,7 +432,7 @@ public class Cdiscisa {
             
             Participante p = new Participante();
             
-            if (row.getCell(2) != null){                    
+            if (row.getCell(2) != null && row.getCell(2).getCellType() != Cell.CELL_TYPE_BLANK && row.getCell(2).getCellType() != Cell.CELL_TYPE_ERROR){                    
                 try{
                     p.determinante = row.getCell(2).getStringCellValue().trim();
                 }catch(Exception ex){
@@ -442,7 +440,7 @@ public class Cdiscisa {
                 }
             }
             
-            if (row.getCell(3) != null){   
+            if (row.getCell(3) != null && row.getCell(3).getCellType() != Cell.CELL_TYPE_BLANK && row.getCell(3).getCellType() != Cell.CELL_TYPE_ERROR){   
                 try{
                 p.sucursal = row.getCell(3).getStringCellValue().trim();
                 }catch(Exception ex){
@@ -450,7 +448,7 @@ public class Cdiscisa {
                 }
             }
             
-            if (row.getCell(4) != null){   
+            if (row.getCell(4) != null && row.getCell(4).getCellType() != Cell.CELL_TYPE_BLANK && row.getCell(4).getCellType() != Cell.CELL_TYPE_ERROR){   
                 try{
                 p.nombre = row.getCell(4).getStringCellValue().trim();
                 }catch(Exception ex){
@@ -458,7 +456,7 @@ public class Cdiscisa {
                 }
             }
             
-            if (row.getCell(5) != null){ 
+            if (row.getCell(5) != null && row.getCell(5).getCellType() != Cell.CELL_TYPE_BLANK && row.getCell(5).getCellType() != Cell.CELL_TYPE_ERROR){ 
                 try{
                 p.apellidos = row.getCell(5).getStringCellValue().trim();
                 }catch(Exception ex){
@@ -466,7 +464,7 @@ public class Cdiscisa {
                 }
             }
             
-            if (row.getCell(6) != null){ 
+            if (row.getCell(6) != null && row.getCell(6).getCellType() != Cell.CELL_TYPE_BLANK && row.getCell(6).getCellType() != Cell.CELL_TYPE_ERROR){ 
                 try{
                 p.curp = row.getCell(6).getStringCellValue().trim();
                 }catch(Exception ex){
@@ -474,7 +472,7 @@ public class Cdiscisa {
                 }
             }
             
-            if (row.getCell(7) != null){ 
+            if (row.getCell(7) != null && row.getCell(7).getCellType() != Cell.CELL_TYPE_BLANK && row.getCell(7).getCellType() != Cell.CELL_TYPE_ERROR){ 
                 try{
                 p.area_puesto = row.getCell(7).getStringCellValue().trim();
                 }catch(Exception ex){
@@ -482,7 +480,7 @@ public class Cdiscisa {
                 }
             }
             
-            if (row.getCell(8) != null){ 
+            if (row.getCell(8) != null && row.getCell(8).getCellType() != Cell.CELL_TYPE_BLANK && row.getCell(8).getCellType() != Cell.CELL_TYPE_ERROR){ 
                 try{
                 p.area_tematica = row.getCell(8).getStringCellValue().trim();
                 }catch(Exception ex){
@@ -491,7 +489,7 @@ public class Cdiscisa {
             }
             
             p.aprovado = false;
-            if (row.getCell(9) != null && row.getCell(9).getStringCellValue().equalsIgnoreCase("Aprobado")){                    
+            if (row.getCell(9) != null && row.getCell(9).getCellType() != Cell.CELL_TYPE_BLANK && row.getCell(9).getCellType() != Cell.CELL_TYPE_ERROR && row.getCell(9).getStringCellValue().equalsIgnoreCase("Aprobado")){                    
                 try{
                     p.aprovado = true;
                 }catch(Exception ex){
@@ -737,7 +735,7 @@ public class Cdiscisa {
             
         }
         
-        Format formatter = new SimpleDateFormat("ddMMMYYYY");
+        Format formatter = new SimpleDateFormat("ddMMMYYYY", new Locale("es","MX"));
         String formatedDate = formatter.format(c.fecha_inicio);
         
         String abrev = abreviaturas.get(c.nombre_curso);
@@ -982,6 +980,7 @@ public class Cdiscisa {
             contentStream.beginText();
             contentStream.setNonStrokingColor(Color.BLACK);
         } else{
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,275, 593));
             contentStream.showText(d.sucursal);
         }
         
@@ -1108,6 +1107,7 @@ public class Cdiscisa {
             contentStream.beginText();
             contentStream.setNonStrokingColor(Color.BLACK);
         } else{
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,275, (float) 213.4)); 
             contentStream.showText(d.sucursal);
         }
         
@@ -1284,7 +1284,7 @@ public class Cdiscisa {
         contentStream.showText(p.area_puesto);  
         
         contentStream.setTextMatrix(new Matrix(1,0,0,1,30,486 ));           
-        if (c.nombre_empresa.equalsIgnoreCase("NUEVA WALMART DE MEXICO S DE RL DE CV")){
+        if (c.walmart){
             contentStream.showText("OPERADORA WALMART S DE RL DE CV");
         }else{
             contentStream.showText(c.nombre_empresa);
@@ -1292,7 +1292,7 @@ public class Cdiscisa {
         
         char[] rfc_emprea_array;
                                             
-        if (c.nombre_empresa.equalsIgnoreCase("NUEVA WALMART DE MEXICO S DE RL DE CV")){
+        if (c.walmart){
             rfc_emprea_array = "OWM011023AWA".toCharArray();
         }else{
             rfc_emprea_array = c.rfc_empresa.toCharArray();
@@ -1322,7 +1322,7 @@ public class Cdiscisa {
         contentStream.setTextMatrix(new Matrix(1,0,0,1,30,381 ));           
         contentStream.showText(c.horas_texto);
         
-        if (c.nombre_empresa.equalsIgnoreCase("NUEVA WALMART DE MEXICO S DE RL DE CV")){
+        if (c.walmart){
             contentStream.setTextMatrix(new Matrix(1,0,0,1,30,356 ));           
             contentStream.showText("6000 SEGURIDAD");
         } else{
@@ -1458,7 +1458,7 @@ public class Cdiscisa {
         
          // Make sure that the content stream is closed:
         contentStream.close();
-        Format formatter = new SimpleDateFormat("ddMMMYYYY");
+        Format formatter = new SimpleDateFormat("ddMMMYYYY", new Locale("es","MX"));
         String formatedDate = formatter.format(c.fecha_inicio);
         
         String abrev = abreviaturas.get(c.nombre_curso);
@@ -1619,13 +1619,14 @@ public class Cdiscisa {
             contentStream.showText(d.sucursal);                                   
         }   
         
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 527)); 
-        contentStream.showText(d.RFC);
-        contentStream.setFont(calibri, 11);
-        contentStream.setTextMatrix(new Matrix(1,0,0,1,72, 527)); 
-        contentStream.showText("RFC: ");
-        contentStream.setFont( calibriBold, 11 ); 
-            
+        if (!c.walmart){
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 527)); 
+            contentStream.showText(d.RFC);
+            contentStream.setFont(calibri, 11);
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,72, 527)); 
+            contentStream.showText("RFC: ");
+            contentStream.setFont( calibriBold, 11 ); 
+        }
         /*
         if (c.walmart){
             contentStream.showText(p1.determinante + " " + d.unidad);
@@ -1852,7 +1853,7 @@ public class Cdiscisa {
 
         //Capacitación + formato tienda + nombre sucursal + numero sucursal + nombre curso + ddmmaaaa
        
-        Format formatter = new SimpleDateFormat("ddMMMYYYY");
+        Format formatter = new SimpleDateFormat("ddMMMYYYY", new Locale("es","MX"));
         String formatedDate = formatter.format(c.fecha_inicio);
         
         String abrev = abreviaturas.get(c.nombre_curso);
