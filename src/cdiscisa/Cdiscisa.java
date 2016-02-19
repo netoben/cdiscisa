@@ -7,15 +7,19 @@ package cdiscisa;
 
 //import static com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream;
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 
 
 import java.io.File;
 import java.io.FileInputStream;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 //import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+
 
 import java.text.DateFormat;
 import java.text.Format;
@@ -48,16 +52,38 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.util.IOUtils;
+
 
 /**
  *
  * @author Ernesto Armendáriz Bernal.
  */
+
+class StreamUtil {
+
+    public static final String PREFIX = "temp";
+    public static final String SUFFIX = ".png";
+
+    public static File stream2file (InputStream in) throws IOException {
+        final File tempFile = File.createTempFile(PREFIX, SUFFIX);
+        tempFile.deleteOnExit();
+        try (FileOutputStream out = new FileOutputStream(tempFile)) {
+            IOUtils.copy(in, out);
+        }
+        return tempFile;
+    }
+
+}
 
 class Directorio {
 String determinante,formato,unidad,estado,municipio,direccion;
@@ -206,8 +232,32 @@ public class Cdiscisa {
 
         ArrayList <Participante> listaParticipantes = null;
         Curso c = null;
+      
+         
+        Workbook wbAbrev = null;
+        try {
+            
+            //ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            //File file = new File(classLoader.getResource("files/abrevcursos.xlsx").toString());
+           // BufferedInputStream file= (BufferedInputStream) cdiscisa.Cdiscisa.class.getClassLoader().getClass().getResourceAsStream("files/abrev_cursos.xlsx");
+           // File file = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/abrevcursos.xlsx").getFile());
+            //wbAbrev = WorkbookFactory.create(new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/abrev_cursos.xlsx").toString()));
+            //InputStream is = new FileInputStream("files/abrevcursos.xlsx");
+            InputStream is2 = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/abrevcursos.xlsx");
+   
+            wbAbrev = WorkbookFactory.create(is2);
+                   
+        } catch (EncryptedDocumentException EDex){
+            JOptionPane.showMessageDialog(null,EDex.getMessage() + "\n" + EDex);
+        } catch (IOException ioex){
+            JOptionPane.showMessageDialog(null,ioex.getMessage());
+        } catch (InvalidFormatException IFEx){
+            JOptionPane.showMessageDialog(null,IFEx.getMessage());
+        }catch(Exception ex) {
+            JOptionPane.showMessageDialog(null,ex.getMessage());
         
-        Workbook wbAbrev = WorkbookFactory.create(new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/abrev_cursos.xlsx").getFile()));
+        }
+         //Workbook wbAbrev = WorkbookFactory.create(file);
         
         try{            
             abreviaturas = llenarAbreviaturas(wbAbrev);
@@ -608,6 +658,7 @@ public class Cdiscisa {
         return listaDirectorio;
     }
     private static void imprimirDiplomas(ArrayList <Participante> listaParticipantes, Curso c, Directorio d, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc, String instructor, Map<String, String> abreviaturas) throws IOException{
+        
           
         ListIterator <Participante> it = listaParticipantes.listIterator();
         Participante p1 = null;
@@ -621,18 +672,25 @@ public class Cdiscisa {
         
         InputStream file = null;
         
-        File logo = null;
-        File firma = null;
+        BufferedImage logo = null;
+        BufferedImage firma = null;
         
-        try{
-             logo = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/logo.png").getFile());
-             
+        try{    
+            
+            //logo = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/logo.png").getFile());
+            //logo = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/logo.png");
+            logo = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/logo.png"));
+            //logo = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/logo.png");
+            
              if(instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
-                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaCoco.png").getFile());
+                 //firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaCoco.png").getFile());
+                 firma = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/firmaCoco.png"));
              } else if (instructor.equalsIgnoreCase("Manuel Anguiano Razón")){
-                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaManuel.png").getFile());
+                 firma = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/firmaManuel.png"));
+                 //firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaManuel.png").getFile());
              } else {
-                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaJorge.png").getFile());
+                 firma = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/firmaJorge.png"));
+                 //firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaJorge.png").getFile());
             }
              
         }catch (Exception ex){
@@ -643,12 +701,16 @@ public class Cdiscisa {
         PDImageXObject logoObject = null;
         
         try{
-            if (chkDipFirma.equalsIgnoreCase("true")){
-                firmaObject = PDImageXObject.createFromFile(firma, document);
-            }
             if (chkDipLogo.equalsIgnoreCase("true")){
-                logoObject = PDImageXObject.createFromFile(logo, document);
+                //logoObject = PDImageXObject.createFromFile(logo, document);                
+                logoObject = LosslessFactory.createFromImage(document, logo);               
             }
+            
+            if (chkDipFirma.equalsIgnoreCase("true")){
+               // firmaObject = PDImageXObject.createFromFile(firma, document);
+               firmaObject = LosslessFactory.createFromImage(document, firma);
+            }
+            
         }catch(Exception ex){
             JOptionPane.showMessageDialog(null, "Error al crear objetos de logo o firma \nfile: " + String.valueOf(logoObject) + "\n" + String.valueOf(firmaObject) + "\n" + ex.toString());
         }
@@ -751,6 +813,8 @@ public class Cdiscisa {
         }
     }
     private static void imprimirDiplomaArriba(Participante p1, Curso c, Directorio d, PDDocument document, PDPage page, PDFont calibri, PDFont calibriBold, PDFont pristina, PDImageXObject logoObject, PDImageXObject firmaObject, String instructor) throws IOException{
+        
+       
         
         COSDictionary pageDict = page.getCOSObject();
         COSDictionary newPageDict = new COSDictionary(pageDict);
@@ -917,7 +981,9 @@ public class Cdiscisa {
 
     }
     private static void imprimirDiplomaDoble(Participante p1, Participante p2, Curso c, Directorio d, PDDocument document, PDPage page, PDFont calibri, PDFont calibriBold, PDFont pristina, PDImageXObject logoObject, PDImageXObject firmaObject, String instructor) throws IOException{
-
+        
+       
+        
         COSDictionary pageDict = page.getCOSObject();
         COSDictionary newPageDict = new COSDictionary(pageDict);
 
@@ -1219,18 +1285,22 @@ public class Cdiscisa {
         }
         document = PDDocument.load(file);
         
-        File logo = null;
-        File firma = null;
+        BufferedImage logo = null;
+        BufferedImage firma = null;
         
         try{
-             logo = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/logo.png").getFile());
-             
+             //logo = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/logo.png").getFile());
+             logo = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/logo.png"));
+             //logo = StreamUtil.stream2file(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/logo.png"));
              if(c.capacitador.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
-                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaCoco.png").getFile());
+                 //firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaCoco.png").getFile());
+                 firma = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/firmaCoco.png"));
              } else if (c.capacitador.equalsIgnoreCase("Manuel Anguiano Razón")){
-                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaManuel.png").getFile());
+                 firma = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/firmaManuel.png"));
+                 //firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaManuel.png").getFile());
              } else {
-                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaJorge.png").getFile());
+                 firma = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/firmaJorge.png"));
+                 //firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaJorge.png").getFile());
             }
              
         }catch (Exception ex){
@@ -1242,10 +1312,13 @@ public class Cdiscisa {
         
         try{
             if (chkDC3Firmaa.equalsIgnoreCase("true")){
-                firmaObject = PDImageXObject.createFromFile(firma, document);
+                firmaObject = LosslessFactory.createFromImage(document, firma);               
+                //firmaObject = PDImageXObject.createFromFile(firma, document);
             }
+            
             if (chkDC3Logoa.equalsIgnoreCase("true")){
-                logoObject = PDImageXObject.createFromFile(logo, document);
+                logoObject = LosslessFactory.createFromImage(document, logo);               
+                //logoObject = PDImageXObject.createFromFile(logo, document);
             }
         }catch(Exception ex){
             JOptionPane.showMessageDialog(null, "Error al crear objetos de logo o firma \nfile: " + String.valueOf(logoObject) + "\n" + String.valueOf(firmaObject) + "\n" + ex.toString());
@@ -1545,18 +1618,25 @@ public class Cdiscisa {
         
         float pageWidth = page1.getMediaBox().getWidth();
         
-        File logo = null;
-        File firma = null;
+        BufferedImage logo = null;
+        BufferedImage firma = null;
         
         try{
-             logo = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/logo.png").getFile());
-             
-             if(instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
-                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaCoco.png").getFile());
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            
+            //logo = new File(classLoader.getResource("files/logo.png").getFile());
+            //logo = StreamUtil.stream2file(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/logo.png"));
+           logo = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/logo.png"));
+            
+            if(instructor.equalsIgnoreCase("Ing. Jorge Antonio Razón Gutierrez")){
+                 firma = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/firmaCoco.png"));
+                 //firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaCoco.png").getFile());
              } else if (instructor.equalsIgnoreCase("Manuel Anguiano Razón")){
-                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaManuel.png").getFile());
+                 firma = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/firmaManuel.png"));
+                 //firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaManuel.png").getFile());
              } else {
-                 firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaJorge.png").getFile());
+                 firma = ImageIO.read(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/firmaJorge.png"));
+                 //firma = new File(cdiscisa.Cdiscisa.class.getClassLoader().getResource("files/firmaJorge.png").getFile());
             }
              
         }catch (Exception ex){
@@ -1568,10 +1648,12 @@ public class Cdiscisa {
         
         try{
             if (chkConstFirma.equalsIgnoreCase("true")){
-                firmaObject = PDImageXObject.createFromFile(firma, document);
+                firmaObject = LosslessFactory.createFromImage(document, firma);
+                //firmaObject = PDImageXObject.createFromFile(firma, document);
             }
             if (chkConstLogo.equalsIgnoreCase("true")){
-                logoObject = PDImageXObject.createFromFile(logo, document);
+                logoObject = LosslessFactory.createFromImage(document, logo);
+                //logoObject = PDImageXObject.createFromFile(logo, document);
             }
         }catch(Exception ex){
             JOptionPane.showMessageDialog(null, "Error al crear objetos de logo o firma \nfile: " + String.valueOf(logoObject) + "\n" + String.valueOf(firmaObject) + "\n" + ex.toString());
@@ -1579,7 +1661,7 @@ public class Cdiscisa {
         
         InputStream isFont1 = null, isFont2 = null;
         try{
-        isFont1 = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/Calibri.ttf");
+        isFont1 = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/Calibri.ttf");       
         isFont2 = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/CalibriBold.ttf");
         } catch(Exception ex) {
             JOptionPane.showMessageDialog(null, "Error al cargar el una fuente \nisFont1: " + String.valueOf(isFont1) + "\nisFont2: " + String.valueOf(isFont2) +  "\n" + ex.toString());
@@ -1871,6 +1953,8 @@ public class Cdiscisa {
         
     }
     private static void imprimirDiplomas_main(ArrayList <Participante> listaParticipantes, Curso c, ArrayList <Directorio> listaDirectorio, String chkDipFirma, String chkDipLogo, String savePath, Map<String,String> dosc, String instructor, Map<String, String> abreviaturas) throws IOException{
+        
+       
         
         ArrayList <Directorio> listaDirecciones = new ArrayList <> ();
         ArrayList <Participante> participantesSucursal = new ArrayList <> ();
