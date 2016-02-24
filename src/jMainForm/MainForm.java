@@ -191,6 +191,7 @@ public class MainForm extends javax.swing.JFrame {
         cboxUnidadCapacitadora = new javax.swing.JComboBox<>();
         cboxInstructor = new javax.swing.JComboBox<>();
         lblUnidadCapacitadora = new javax.swing.JLabel();
+        chkDC3CURP = new javax.swing.JCheckBox();
         generar = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         lblDirectorio = new javax.swing.JLabel();
@@ -307,10 +308,21 @@ public class MainForm extends javax.swing.JFrame {
         lblUnidadCapacitadora.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblUnidadCapacitadora.setText("Unidad Capacitadora");
 
+        chkDC3CURP.setFont(new java.awt.Font("Helvetica Neue", 0, 13)); // NOI18N
+        chkDC3CURP.setText("¿Imprimir DC3 con CURPs mal formados?");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(cboxUnidadCapacitadora, 0, 241, Short.MAX_VALUE)
+                    .addComponent(lblInstructor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cboxInstructor, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblUnidadCapacitadora, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(100, 100, 100))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -339,17 +351,12 @@ public class MainForm extends javax.swing.JFrame {
                                     .addGap(29, 29, 29)
                                     .addComponent(chkDC3Logo)))
                             .addGap(23, 23, 23)
-                            .addComponent(chkDC3Firma)))
+                            .addComponent(chkDC3Firma))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addGap(29, 29, 29)
+                            .addComponent(chkDC3CURP)))
                     .addComponent(chkArchivoCompilado))
                 .addContainerGap(21, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cboxUnidadCapacitadora, 0, 241, Short.MAX_VALUE)
-                    .addComponent(lblInstructor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(cboxInstructor, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblUnidadCapacitadora, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(100, 100, 100))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -374,9 +381,11 @@ public class MainForm extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkDC3Firma)
                     .addComponent(chkDC3Logo))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addComponent(chkDC3CURP)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkArchivoCompilado)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(lblUnidadCapacitadora)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cboxUnidadCapacitadora, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -831,6 +840,7 @@ public class MainForm extends javax.swing.JFrame {
                 String nl = it.next();
                 fw.append(nl);            
             }
+            fw.close();
   
         }
     }
@@ -839,7 +849,7 @@ public class MainForm extends javax.swing.JFrame {
         
        
         String directorioPath, destFolder, listaPath;
-        String chkDip,chkDipFirma,chkDipLogo,chkConst,chkConstFirma,chkConstLogo,chkDC3a,chkDC3Firmaa,chkDC3Logoa,chkCompilado;
+        String chkDip,chkDipFirma,chkDipLogo,chkConst,chkConstFirma,chkConstLogo,chkDC3a,chkDC3Firmaa,chkDC3CURP,chkDC3Logoa,chkCompilado;
         String unidadCapacitadora,instructor,registro,lista_autografa;
         
         directorioPath = this.txtDirectorio.getText();
@@ -868,6 +878,7 @@ public class MainForm extends javax.swing.JFrame {
         chkDC3a = String.valueOf(this.chkDC3.isSelected());
         chkDC3Firmaa = String.valueOf(this.chkDC3Firma.isSelected());
         chkDC3Logoa = String.valueOf(this.chkDC3Logo.isSelected());
+        chkDC3CURP = String.valueOf(this.chkDC3CURP.isSelected());
         
         chkCompilado = String.valueOf(this.chkArchivoCompilado.isSelected());
         
@@ -881,7 +892,7 @@ public class MainForm extends javax.swing.JFrame {
             lista_autografa = "";
         }
         
-        String[] args = {directorioPath, destFolder, listaPath,unidadCapacitadora,instructor,chkDip,chkDipFirma,chkDipLogo,chkConst,chkConstFirma,chkConstLogo,chkDC3a,chkDC3Firmaa,chkDC3Logoa,chkCompilado,registro,lista_autografa};
+        String[] args = {directorioPath, destFolder, listaPath,unidadCapacitadora,instructor,chkDip,chkDipFirma,chkDipLogo,chkConst,chkConstFirma,chkConstLogo,chkDC3a,chkDC3Firmaa,chkDC3Logoa,chkCompilado,registro,lista_autografa,chkDC3CURP};
 
         
             SwingWorker sw = new SwingWorker(){
@@ -1218,6 +1229,7 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkConstanciasFirma1;
     private javax.swing.JCheckBox chkConstanciasLogo;
     private javax.swing.JCheckBox chkDC3;
+    private javax.swing.JCheckBox chkDC3CURP;
     private javax.swing.JCheckBox chkDC3Firma;
     private javax.swing.JCheckBox chkDC3Logo;
     private javax.swing.JCheckBox chkDiplomaFirma;

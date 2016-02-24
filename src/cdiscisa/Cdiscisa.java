@@ -8,14 +8,15 @@ package cdiscisa;
 //import static com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import java.io.File;
 import java.io.FileInputStream;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 //import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,12 +53,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
-import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.poi.EncryptedDocumentException;
@@ -111,7 +112,7 @@ public Directorio(){
 }
 class Participante { 
   String determinante, sucursal, nombre, apellidos,curp,area_puesto,area_tematica; 
-  boolean aprovado;   
+  boolean aprovado, curp_malformed;   
   
   public Participante(){
       this.determinante = "";
@@ -122,6 +123,7 @@ class Participante {
       this.curp="";
       this.nombre="";
       this.sucursal="";
+      this.curp_malformed = true;
   }
 } 
 
@@ -174,7 +176,7 @@ public class Cdiscisa {
         
         
         
-        //directorioPath, destFolder, listaPath,unidadCapacitadora,instructor,chkDip,chkDipFirma,chkDipLogo,chkConst,chkConstFirma,chkConstLogo,chkDC3a,chkDC3Firmaa,chkDC3Logoa,chkCompilado
+        //directorioPath, destFolder, listaPath,unidadCapacitadora,instructor,chkDip,chkDipFirma,chkDipLogo,chkConst,chkConstFirma,chkConstLogo,chkDC3a,chkDC3Firmaa,chkDC3Logoa,chkCompilado, chkDC3CURP
         //Workbook wbLista = WorkbookFactory.create(new File("src/files/FormatoCertificado.xlsx"));
         //Workbook wbDirectorio = WorkbookFactory.create(new File("src/files/DirectorioBAE.xlsx"));
         Workbook wbDirectorio = null, wbLista;
@@ -280,7 +282,7 @@ public class Cdiscisa {
             return;
         }
         try{
-            listaParticipantes = llenarParticipantes(wbLista);
+            listaParticipantes = llenarParticipantes(wbLista, args[1]);
         } catch(Exception ex){
             JOptionPane.showMessageDialog(null, "Hubo un error leyendo el archivo la Lista de Participantes, es posible que contenga celdas faltantes o mal formadas");
             return;
@@ -297,7 +299,7 @@ public class Cdiscisa {
         }
         
         if (args[11].equalsIgnoreCase("true")){            
-            imprimirDC3(listaParticipantes,c, args[12], args[13], args[1], dosc, abreviaturas);
+            imprimirDC3(listaParticipantes,c, args[12], args[13], args[1], dosc, abreviaturas, args[17]);
         }
         
         if (args[14].equalsIgnoreCase("true")){            
@@ -453,12 +455,30 @@ public class Cdiscisa {
         
         return c;
     }
-    private static ArrayList <Participante> llenarParticipantes (Workbook wbLista) throws Exception{
+    private static ArrayList <Participante> llenarParticipantes (Workbook wbLista, String savePath) throws Exception{
         
         ArrayList <Participante> listaParticipantes = new ArrayList <>();
         Sheet wbListaSheet = wbLista.getSheetAt(0);
         Iterator<Row> rowIterator = wbListaSheet.iterator();
-        
+        String regex = "[A-Z]{1}[AEIOU]{1}[A-Z]{2}[0-9]{2}[0-1]{1}[0-9]{1}[0-3]{1}[0-9]{1}[HM]{1}(AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[0-9A-Z]{5}$";
+            /*
+            "[A-Z]{2}([AEIOU]{1}|X)[A-Z]{2}[0-9]{2}" +
+            "[0-9]{2}[0-1]{1}[0-9]{1}[0-3]{1}[0-9]{1}" +
+            "[HM]{1}" +
+            "(AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)" +
+            "[0-9A-Z]{5}$";
+            */
+        Boolean sw=false;
+        File file = new File(savePath + File.separator + "CURP_incorrecto.csv");
+        if(!file.exists()) {
+           file.createNewFile();
+        }
+            
+        FileWriter fw = new FileWriter(file.getAbsoluteFile());           
+            fw.write("");
+                       
+            
+  
         while(rowIterator.hasNext()){
         
             Row row = rowIterator.next();
@@ -517,6 +537,20 @@ public class Cdiscisa {
             if (row.getCell(6) != null && row.getCell(6).getCellType() != Cell.CELL_TYPE_BLANK && row.getCell(6).getCellType() != Cell.CELL_TYPE_ERROR){ 
                 try{
                 p.curp = row.getCell(6).getStringCellValue().trim();
+                Pattern pat = Pattern.compile(regex);
+                
+                Matcher mat = pat.matcher(p.curp);
+                
+                if (!mat.matches()){
+                    fw.append(p.curp + "," + p.nombre + " " + p.apellidos + "\n"); 
+                    sw= true;
+                    //JOptionPane.showMessageDialog(null,"El CURP " + p.curp + " del participante " + p.nombre + " " + p.apellidos + " parece estar mal formado, favor de revisarlo");
+                } else {
+                    p.curp_malformed = false;
+                }
+                /*if (p.curp.length()>18){
+                    throw new netoCustomException("Hay un error en el CURP: " + p.curp + " de " + p.nombre + " " + p.apellidos + ".\n Debería tener 18 caracteres, y tiene " + p.curp.length());
+                } */               
                 }catch(Exception ex){
                     JOptionPane.showMessageDialog(null, "Error leyendo la columna CURP del archivo Excel de Lista de participantes  ");
                 }
@@ -551,7 +585,11 @@ public class Cdiscisa {
             
         }
         
+        fw.close();
         
+        if (sw){
+            JOptionPane.showMessageDialog(null,"Algunos participantes parecen tener el CURP incorrecto. Este archivo contiene los errores: \n\n" + savePath + File.separator + "CURP_incorrecto.csv");
+        }
         
         return listaParticipantes;
  // method body
@@ -1258,13 +1296,13 @@ public class Cdiscisa {
         //document.save( "DiplomaSoloTest.pdf");
         //document.close();
     }
-    private static void imprimirDC3(ArrayList <Participante> listaParticipantes, Curso c, String chkDC3Firmaa, String chkDC3Logoa, String savePath,  Map<String,String> dosc, Map<String, String> abreviaturas) throws IOException{   
+    private static void imprimirDC3(ArrayList <Participante> listaParticipantes, Curso c, String chkDC3Firmaa, String chkDC3Logoa, String savePath,  Map<String,String> dosc, Map<String, String> abreviaturas,String printBadCURPS) throws IOException{   
         
         ListIterator <Participante> it = listaParticipantes.listIterator();
         Participante p;
         while(it.hasNext()){
             p = it.next();
-            if (p.aprovado){
+            if (p.aprovado && (!p.curp_malformed || printBadCURPS.equalsIgnoreCase("true"))){
             imprimirDC3_individual(p,c, chkDC3Firmaa, chkDC3Logoa, savePath, dosc, abreviaturas);
             }
         }  
@@ -1276,6 +1314,8 @@ public class Cdiscisa {
         PDDocument document;
         //BufferedInputStream file;
         InputStream file = null;
+        
+        
         
         try{
             file = cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/DC3_blank.pdf");
@@ -1338,8 +1378,14 @@ public class Cdiscisa {
         contentStream.setTextMatrix(new Matrix(1,0,0,1,30,602 ));           
         contentStream.showText(p.apellidos + " " + p.nombre);
         
+        String temp;
         
-        char[] curpArray = p.curp.toCharArray();
+        if (p.curp.length() > 18){
+            temp = p.curp.substring(0, 18);
+        } else {
+            temp = p.curp;
+        }
+        char[] curpArray = temp.toCharArray();
         float[] xPosition = {32, 49, 63, 77, 92, (float)106.5, 120, (float)134.5, 149, 163, 177, (float)191.5, 205, 223, 241, 255, 269, 286};
         
         float charWidth;
