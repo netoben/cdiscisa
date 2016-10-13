@@ -429,6 +429,7 @@ public class Cdiscisa {
             }
          }
         if (!(wbListaSheet.getRow(6) == null || wbListaSheet.getRow(6).getCell(6) == null)){
+            wbListaSheet.getRow(6).getCell(6).setCellType(Cell.CELL_TYPE_STRING);
             cal.set(Calendar.MONTH, Integer.parseInt(wbListaSheet.getRow(6).getCell(6).getStringCellValue())-1);
         }
         if (!(wbListaSheet.getRow(8) == null || wbListaSheet.getRow(8).getCell(6) == null)){
@@ -445,6 +446,7 @@ public class Cdiscisa {
             }
          }
         if (!(wbListaSheet.getRow(6) == null || wbListaSheet.getRow(6).getCell(7) == null)){
+            wbListaSheet.getRow(6).getCell(7).setCellType(Cell.CELL_TYPE_STRING);
             cal.set(Calendar.MONTH, Integer.parseInt(wbListaSheet.getRow(6).getCell(7).getStringCellValue())-1);
         }
         if (!(wbListaSheet.getRow(8) == null || wbListaSheet.getRow(8).getCell(7) == null)){
@@ -669,7 +671,8 @@ public class Cdiscisa {
                     if (row.getCell(8) != null){                     
                         d.RFC = row.getCell(8).getStringCellValue().trim();
                     }
-                    if (row.getCell(9) != null){                     
+                    if (row.getCell(9) != null){       
+                        row.getCell(9).setCellType(Cell.CELL_TYPE_STRING);
                         d.telefono = row.getCell(9).getStringCellValue().trim();
                     }
                     if (row.getCell(10) != null){                     
