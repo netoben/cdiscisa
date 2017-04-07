@@ -9,13 +9,13 @@ package cdiscisa;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+//import java.util.regex.PatternSyntaxException;
 
 import java.io.File;
 import java.io.FileInputStream;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+//import java.io.FileOutputStream;
 import java.io.FileWriter;
 //import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -62,7 +62,7 @@ import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.util.IOUtils;
+//import org.apache.poi.util.IOUtils;
 
 
 /**
@@ -70,6 +70,7 @@ import org.apache.poi.util.IOUtils;
  * @author Ernesto Armendáriz Bernal.
  */
 
+/*
 class StreamUtil {
 
     public static final String PREFIX = "temp";
@@ -85,6 +86,7 @@ class StreamUtil {
     }
 
 }
+*/
 
 class Directorio {
 String determinante,formato,unidad,estado,municipio,direccion;
@@ -174,9 +176,32 @@ public class Cdiscisa {
     
     public static void main(String[] args) throws IOException, InvalidFormatException, Exception {
         
+            //	directorioPath	0
+            //	 destFolder	1
+            //	 listaPath	2
+            //	unidadCapacitadora	3
+            //	instructor	4
+            //	chkDip	5
+            //	chkDipFirma	6
+            //	chkDipLogo	7
+            //	chkConst	8
+            //	chkConstFirma	9
+            //	chkConstLogo	10
+            //	chkDC3a	11
+            //	chkDC3Firmaa	12
+            //	chkDC3Logoa	13
+            //	chkCompilado	14
+            //	registro	15
+            //	lista_autografa	16
+            //	chkDC3CURP	17
+            //	chkDC5	18
+            //	chkIFE	19
+            //	chkSTPS	20
+            //  registro1 21
+            //  chkRegistro1a 22
+
         
-        
-        //directorioPath, destFolder, listaPath,unidadCapacitadora,instructor,chkDip,chkDipFirma,chkDipLogo,chkConst,chkConstFirma,chkConstLogo,chkDC3a,chkDC3Firmaa,chkDC3Logoa,chkCompilado, chkDC3CURP
+        //directorioPath, destFolder, listaPath,unidadCapacitadora,instructor,chkDip,chkDipFirma,chkDipLogo,chkConst,chkConstFirma,chkConstLogo,chkDC3a,chkDC3Firmaa,chkDC3Logoa,chkCompilado, chkDC3CURP, chkDC5a,chkIFEa,chkSTPSa
         //Workbook wbLista = WorkbookFactory.create(new File("src/files/FormatoCertificado.xlsx"));
         //Workbook wbDirectorio = WorkbookFactory.create(new File("src/files/DirectorioBAE.xlsx"));
         Workbook wbDirectorio = null, wbLista;
@@ -303,7 +328,7 @@ public class Cdiscisa {
         }
         
         if (args[14].equalsIgnoreCase("true")){            
-            mergeFiles(dosc,listaParticipantes,listaDirectorio, nameRegistro, args[16]);
+            mergeFiles(dosc,listaParticipantes,listaDirectorio, nameRegistro, args[16], args[18], args[19], args[20], args[21],args[22]);
         }
         
         JOptionPane.showMessageDialog(null, "Los documentos se han generado exitosamente");
@@ -332,9 +357,12 @@ public class Cdiscisa {
         
         Curso c = new Curso();
         
-        if (!(wbListaSheet.getRow(2) == null || wbListaSheet.getRow(2).getCell(4) == null || wbListaSheet.getRow(2).getCell(4).getStringCellValue().isEmpty()) ){
+        if (!(wbListaSheet.getRow(2) == null || wbListaSheet.getRow(2).getCell(4) == null) ){
             try {
-                c.nombre_empresa = wbListaSheet.getRow(2).getCell(4).getStringCellValue();
+                wbListaSheet.getRow(2).getCell(4).setCellType(Cell.CELL_TYPE_STRING);
+                if (!wbListaSheet.getRow(2).getCell(4).getStringCellValue().isEmpty()){
+                    c.nombre_empresa = wbListaSheet.getRow(2).getCell(4).getStringCellValue();
+                }
             } catch (Exception ex){
                 JOptionPane.showMessageDialog(null, "El nombre de la empresa en la Lista de Participantes parece tener datos no válidos"); 
                 throw new netoCustomException("Error al leer los datos del curso");
@@ -342,38 +370,51 @@ public class Cdiscisa {
             
         }
         
-        if (!(wbListaSheet.getRow(4) == null || wbListaSheet.getRow(4).getCell(4) == null || wbListaSheet.getRow(4).getCell(4).getStringCellValue().isEmpty()) ) {
+        if (!(wbListaSheet.getRow(4) == null || wbListaSheet.getRow(4).getCell(4) == null) ) {
             try{
-                c.nombre_curso = wbListaSheet.getRow(4).getCell(4).getStringCellValue();
+                wbListaSheet.getRow(4).getCell(4).setCellType(Cell.CELL_TYPE_STRING);
+                if (!wbListaSheet.getRow(4).getCell(4).getStringCellValue().isEmpty()){
+                    c.nombre_curso = wbListaSheet.getRow(4).getCell(4).getStringCellValue();
+                }
+                
             } catch (Exception ex){
                 JOptionPane.showMessageDialog(null, "El nombre de el curso Lista de Participantes parece tener datos no válidos"); 
                 throw new netoCustomException("Error al leer los datos del curso");
             }
         }
         
-        if (!(wbListaSheet.getRow(6) == null || wbListaSheet.getRow(6).getCell(4) == null || wbListaSheet.getRow(6).getCell(4).getStringCellValue().isEmpty()) ){
+        if (!(wbListaSheet.getRow(6) == null || wbListaSheet.getRow(6).getCell(4) == null) ){
             try{
-                c.nombre_instructor = wbListaSheet.getRow(6).getCell(4).getStringCellValue();
+                wbListaSheet.getRow(6).getCell(4).setCellType(Cell.CELL_TYPE_STRING);
+                if (!wbListaSheet.getRow(6).getCell(4).getStringCellValue().isEmpty()){
+                    c.nombre_instructor = wbListaSheet.getRow(6).getCell(4).getStringCellValue();
+                }
             }catch (Exception ex){
                 JOptionPane.showMessageDialog(null, "El nombre de el instructor Lista de Participantes parece tener datos no válidos"); 
                 throw new netoCustomException("Error al leer los datos del curso");
             }
         }
         
-        if (!(wbListaSheet.getRow(8) == null || wbListaSheet.getRow(8).getCell(4) == null || wbListaSheet.getRow(8).getCell(4).getStringCellValue().isEmpty())  ){
+        if (!(wbListaSheet.getRow(8) == null || wbListaSheet.getRow(8).getCell(4) == null)  ){
             try{
-                c.horas_texto = wbListaSheet.getRow(8).getCell(4).getStringCellValue();
+                wbListaSheet.getRow(8).getCell(4).setCellType(Cell.CELL_TYPE_STRING);
+                if (!wbListaSheet.getRow(8).getCell(4).getStringCellValue().isEmpty()){
+                    c.horas_texto = wbListaSheet.getRow(8).getCell(4).getStringCellValue();
+                }
             }catch (Exception ex){
                 JOptionPane.showMessageDialog(null, "La casilla de Horas en la Lista de Participantes parece tener datos no válidos"); 
                 throw new netoCustomException("Error al leer los datos del curso");
             }
         }
         
-        if (!(wbListaSheet.getRow(11) == null || wbListaSheet.getRow(11).getCell(4) == null || wbListaSheet.getRow(11).getCell(4).getStringCellValue().isEmpty())  ){
+        if (!(wbListaSheet.getRow(11) == null || wbListaSheet.getRow(11).getCell(4) == null)  ){
             try{
-                c.razon_social = wbListaSheet.getRow(11).getCell(4).getStringCellValue();
-                if (!c.razon_social.equalsIgnoreCase("NUEVA WAL‐MART DE MEXICO S DE RL DE C.V.") && !c.razon_social.equalsIgnoreCase("NUEVA WAL-MART DE MEXICO S DE RL DE C.V.")){
-                    c.walmart = false;
+                wbListaSheet.getRow(11).getCell(4).setCellType(Cell.CELL_TYPE_STRING);
+                if (!wbListaSheet.getRow(11).getCell(4).getStringCellValue().isEmpty()){
+                    c.razon_social = wbListaSheet.getRow(11).getCell(4).getStringCellValue();
+                    if (!c.razon_social.equalsIgnoreCase("NUEVA WAL‐MART DE MEXICO S DE RL DE C.V.") && !c.razon_social.equalsIgnoreCase("NUEVA WAL-MART DE MEXICO S DE RL DE C.V.")){
+                        c.walmart = false;
+                    }
                 }
             }catch (Exception ex){
                 JOptionPane.showMessageDialog(null, "La casilla de Razón Social de la empresa en la Lista de Participantes parece tener datos no válidos"); 
@@ -381,9 +422,12 @@ public class Cdiscisa {
             }         
         }
         
-        if (!(wbListaSheet.getRow(13) == null || wbListaSheet.getRow(13).getCell(4) == null || wbListaSheet.getRow(13).getCell(4).getStringCellValue().isEmpty())  ){
+        if (!(wbListaSheet.getRow(13) == null || wbListaSheet.getRow(13).getCell(4) == null )  ){
             try{
-                c.rfc_empresa = wbListaSheet.getRow(13).getCell(4).getStringCellValue();
+                wbListaSheet.getRow(13).getCell(4).setCellType(Cell.CELL_TYPE_STRING);
+                if (!wbListaSheet.getRow(13).getCell(4).getStringCellValue().isEmpty()){
+                    c.rfc_empresa = wbListaSheet.getRow(13).getCell(4).getStringCellValue();
+                }
             }catch (Exception ex){
                 JOptionPane.showMessageDialog(null, "La casill de RFC de la empresa en Lista de Participantes parece tener datos no válidos"); 
                 throw new netoCustomException("Error al leer los datos del curso");
@@ -393,18 +437,25 @@ public class Cdiscisa {
             throw new netoCustomException("Error al leer los datos del curso");
         }
         
-        if (!(wbListaSheet.getRow(15) == null || wbListaSheet.getRow(15).getCell(4) == null || wbListaSheet.getRow(15).getCell(4).getStringCellValue().isEmpty())  ){
+        //wbListaSheet.getRow(6).getCell(6).setCellType(Cell.CELL_TYPE_STRING);
+        if (!(wbListaSheet.getRow(15) == null || wbListaSheet.getRow(15).getCell(4) == null )  ){
            try{
-               c.fecha_certificado = wbListaSheet.getRow(15).getCell(4).getStringCellValue();
+               wbListaSheet.getRow(15).getCell(4).setCellType(Cell.CELL_TYPE_STRING);
+               if (!wbListaSheet.getRow(15).getCell(4).getStringCellValue().isEmpty()){
+                c.fecha_certificado = wbListaSheet.getRow(15).getCell(4).getStringCellValue();
+               }
            }catch (Exception ex){
                 JOptionPane.showMessageDialog(null, "La casilla de la fecha de certificado de la empresa en la Lista de Participantes parece tener datos no válidos"); 
                 throw new netoCustomException("Error al leer los datos del curso");
             }               
         }
         
-        if (!(wbListaSheet.getRow(17) == null || wbListaSheet.getRow(17).getCell(4) == null || wbListaSheet.getRow(17).getCell(4).getStringCellValue().isEmpty())  ){
+        if (!(wbListaSheet.getRow(17) == null || wbListaSheet.getRow(17).getCell(4) == null )  ){
             try{
-                c.fecha_texto_diploma = wbListaSheet.getRow(17).getCell(4).getStringCellValue();
+                wbListaSheet.getRow(17).getCell(4).setCellType(Cell.CELL_TYPE_STRING);
+                if (!wbListaSheet.getRow(17).getCell(4).getStringCellValue().isEmpty()){
+                    c.fecha_texto_diploma = wbListaSheet.getRow(17).getCell(4).getStringCellValue();
+                }
             }catch (Exception ex){
                 JOptionPane.showMessageDialog(null, "La casilla de la fecha para diploma de la empresa en la Lista de Participantes parece tener datos no válidos"); 
                 throw new netoCustomException("Error al leer los datos del curso");
@@ -421,7 +472,7 @@ public class Cdiscisa {
         
         Calendar cal = Calendar.getInstance();
         
-        if (!(wbListaSheet.getRow(4) == null || wbListaSheet.getRow(4).getCell(6) == null)){
+        if (!(wbListaSheet.getRow(4) == null || wbListaSheet.getRow(4).getCell(6) == null )){
             if (wbListaSheet.getRow(4).getCell(6).getCellType() == 1){
                 cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(wbListaSheet.getRow(4).getCell(6).getStringCellValue()));                
             } else{
@@ -475,11 +526,9 @@ public class Cdiscisa {
         if(!file.exists()) {
            file.createNewFile();
         }
-            
         FileWriter fw = new FileWriter(file.getAbsoluteFile());           
-            fw.write("");
-                       
-            
+        fw.write("");
+        
   
         while(rowIterator.hasNext()){
         
@@ -620,6 +669,7 @@ public class Cdiscisa {
             
             try{
                 
+                
                 if (walmart && (row.getCell(0) == null || row.getCell(0).toString().isEmpty()) ){
                     break;
                 } else if(row.getCell(0) == null || row.getCell(0).toString().isEmpty()){
@@ -634,7 +684,8 @@ public class Cdiscisa {
                     d.determinante = row.getCell(0).getStringCellValue().trim();
                 }
 
-                if (row.getCell(1) != null){   
+                if (row.getCell(1) != null){  
+                    row.getCell(1).setCellType(Cell.CELL_TYPE_STRING);
                     if (walmart){
                         d.formato= row.getCell(1).getStringCellValue().trim();
                     } else
@@ -643,7 +694,8 @@ public class Cdiscisa {
                     }
                 }
 
-                if (row.getCell(2) != null){    
+                if (row.getCell(2) != null){  
+                    row.getCell(2).setCellType(Cell.CELL_TYPE_STRING);
                     if (walmart){
                         d.unidad = row.getCell(2).getStringCellValue().trim();
                     }else{
@@ -651,24 +703,31 @@ public class Cdiscisa {
                     }
                 }
 
-                if (row.getCell(3) != null){                     
+                if (row.getCell(3) != null){  
+                    row.getCell(3).setCellType(Cell.CELL_TYPE_STRING);
                     d.estado = row.getCell(3).getStringCellValue().trim();
                 }
                 if (row.getCell(4) != null){                     
+                    row.getCell(4).setCellType(Cell.CELL_TYPE_STRING);
                     d.municipio = row.getCell(4).getStringCellValue().trim();
                 }
                 if (row.getCell(5) != null){                     
+                    row.getCell(5).setCellType(Cell.CELL_TYPE_STRING);
                     d.direccion = row.getCell(5).getStringCellValue().trim();
                 }
                 
                 if (!walmart){
-                    if (row.getCell(6) != null){                     
+                    
+                    if (row.getCell(6) != null){  
+                        row.getCell(6).setCellType(Cell.CELL_TYPE_STRING);
                         d.nombre_comercial = row.getCell(6).getStringCellValue().trim();
                     }
-                    if (row.getCell(7) != null){                     
+                    if (row.getCell(7) != null){     
+                        row.getCell(7).setCellType(Cell.CELL_TYPE_STRING);
                         d.dirección_fiscal = row.getCell(7).getStringCellValue().trim();
                     }
                     if (row.getCell(8) != null){                     
+                        row.getCell(8).setCellType(Cell.CELL_TYPE_STRING);
                         d.RFC = row.getCell(8).getStringCellValue().trim();
                     }
                     if (row.getCell(9) != null){       
@@ -676,15 +735,19 @@ public class Cdiscisa {
                         d.telefono = row.getCell(9).getStringCellValue().trim();
                     }
                     if (row.getCell(10) != null){                     
+                        row.getCell(10).setCellType(Cell.CELL_TYPE_STRING);
                         d.nombre_contacto = row.getCell(10).getStringCellValue().trim();
                     }
                     if (row.getCell(11) != null){                     
+                        row.getCell(11).setCellType(Cell.CELL_TYPE_STRING);
                         d.mail_envio_constancias = row.getCell(11).getStringCellValue().trim();
                     }
                     if (row.getCell(12) != null){                     
+                        row.getCell(12).setCellType(Cell.CELL_TYPE_STRING);
                         d.mail_cco = row.getCell(12).getStringCellValue().trim();
                     }
                     if (row.getCell(13) != null){                     
+                        row.getCell(13).setCellType(Cell.CELL_TYPE_STRING);
                         d.notas = row.getCell(13).getStringCellValue().trim();
                     }
                 }
@@ -838,15 +901,18 @@ public class Cdiscisa {
             
         }
         
-        Format formatter = new SimpleDateFormat("ddMMMYYYY", new Locale("es","MX"));
+        //Format formatter = new SimpleDateFormat("ddMMMYYYY", new Locale("es","MX"));  REVISION2
+        Format formatter = new SimpleDateFormat("ddMMMYY", new Locale("es","MX"));  // REVISION2
         String formatedDate = formatter.format(c.fecha_inicio);
         
         String abrev = abreviaturas.get(c.nombre_curso);
         
         if (c.walmart){
-            document.save(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");
+            //document.save(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");   REVISION2
+            document.save(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.determinante + "_" +  d.unidad + "_" + formatedDate + "_" + abrev + ".pdf"); // REVISION2
             document.close();        
-            dosc.put(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf",d.determinante);
+            //dosc.put(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf",d.determinante);   REVISION2
+            dosc.put(savePath + File.separator + "Diplomas_" + d.formato + "_" + d.determinante + "_" + d.unidad + "_"  +  formatedDate + "_" + abrev + ".pdf",d.determinante);  //REVISION2
         }else{
             document.save(savePath + File.separator + "Diplomas_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");
             document.close();        
@@ -1580,16 +1646,19 @@ public class Cdiscisa {
         
          // Make sure that the content stream is closed:
         contentStream.close();
-        Format formatter = new SimpleDateFormat("ddMMMYYYY", new Locale("es","MX"));
+        //Format formatter = new SimpleDateFormat("ddMMMYYYY", new Locale("es","MX"));  //REVISION2
+        Format formatter = new SimpleDateFormat("ddMMMYY", new Locale("es","MX"));   //REVISION2
         String formatedDate = formatter.format(c.fecha_inicio);
         
         String abrev = abreviaturas.get(c.nombre_curso);
         
         // Save the results and ensure that the document is properly closed:
         
-        document.save(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + abrev + "_" + formatedDate + ".pdf");
+        //document.save(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + abrev + "_" + formatedDate + ".pdf"); //REVISION2
+        document.save(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + formatedDate + "_" + abrev + ".pdf");  //REVISION2
         document.close();        
-        dosc.put(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + abrev + "_" + formatedDate + ".pdf", p.determinante);
+        //dosc.put(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + abrev + "_" + formatedDate + ".pdf", p.determinante);  //REVISION2
+        dosc.put(savePath + File.separator + "p_DC3_" + p.curp + "_" + p.determinante + "_" + p.nombre.replaceAll(" ","_") + "_" + p.apellidos.replaceAll(" ","_") + "_" + formatedDate + "_" + abrev + ".pdf", p.determinante);  //REVISION2
         
         
     }
@@ -1781,10 +1850,16 @@ public class Cdiscisa {
             contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 549));           
             contentStream.showText(d.direccion);
         } else {
-            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 552));           
-            contentStream.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 82)));
-            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 541));           
-            contentStream.showText(d.direccion.substring(d.direccion.indexOf(" ", 82) + 1, d.direccion.length()));
+            contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 552));    
+            if (!(d.direccion.indexOf(" ", 82) == -1)){ //REVISION2
+                contentStream.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 82)));
+                contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 541));           
+                contentStream.showText(d.direccion.substring(d.direccion.indexOf(" ", 82) + 1, d.direccion.length()));
+            } else {  //REVISION2
+                contentStream.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 50)));
+                contentStream.setTextMatrix(new Matrix(1,0,0,1,120, 541));           
+                contentStream.showText(d.direccion.substring(d.direccion.indexOf(" ", 50) + 1, d.direccion.length()));            
+            }  // REVISION2
         }
         
         charWidth = calibriBold.getStringWidth(c.nombre_curso) /1000 * 11;
@@ -1920,10 +1995,17 @@ public class Cdiscisa {
             contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 549));           
             contentStream2.showText(d.direccion);
         } else {
-            contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 555));           
-            contentStream2.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 82)));
-            contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 540));           
-            contentStream2.showText(d.direccion.substring(d.direccion.indexOf(" ", 82) + 1, d.direccion.length()));
+            if (!(d.direccion.indexOf(" ", 82) == -1)){
+                contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 555));           
+                contentStream2.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 82)));
+                contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 540));           
+                contentStream2.showText(d.direccion.substring(d.direccion.indexOf(" ", 82) + 1, d.direccion.length()));
+            }else{
+                contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 555));           
+                contentStream2.showText(d.direccion.substring(0, d.direccion.indexOf(" ", 50)));
+                contentStream2.setTextMatrix(new Matrix(1,0,0,1,120, 540));           
+                contentStream2.showText(d.direccion.substring(d.direccion.indexOf(" ", 50) + 1, d.direccion.length()));
+            }
         }
         
         charWidth = calibriBold.getStringWidth(c.nombre_curso) /1000 * 11;
@@ -1984,16 +2066,19 @@ public class Cdiscisa {
 
         //Capacitación + formato tienda + nombre sucursal + numero sucursal + nombre curso + ddmmaaaa
        
-        Format formatter = new SimpleDateFormat("ddMMMYYYY", new Locale("es","MX"));
+        //Format formatter = new SimpleDateFormat("ddMMMYYYY", new Locale("es","MX"));  //REVISION2
+        Format formatter = new SimpleDateFormat("ddMMMYY", new Locale("es","MX"));  //REVISION2
         String formatedDate = formatter.format(c.fecha_inicio);
         
         String abrev = abreviaturas.get(c.nombre_curso);
         
         // Save the results and ensure that the document is properly closed:
         if(c.walmart){
-            document.save(savePath + File.separator + "Certificado_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");
+            //document.save(savePath + File.separator + "Certificado_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");  //REVISION2
+            document.save(savePath + File.separator + "Certificado_" + d.formato + "_" + d.determinante + "_" +  d.unidad + "_"  + formatedDate + "_" + abrev + ".pdf");  //REVISION2
             document.close();
-            dosc.put(savePath + File.separator + "Certificado_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf", d.determinante);
+            //dosc.put(savePath + File.separator + "Certificado_" + d.formato + "_" + d.unidad + "_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf", d.determinante); //REVISION2
+            dosc.put(savePath + File.separator + "Certificado_" +  d.formato + "_"  + d.determinante + "_" + d.unidad + "_" + formatedDate + "_" + abrev + ".pdf", d.determinante);  //REVISION2
         }else{
             document.save(savePath + File.separator + "Certificado_" + d.determinante + "_" + abrev + "_" + formatedDate + ".pdf");
             document.close();
@@ -2040,7 +2125,9 @@ public class Cdiscisa {
             participantesSucursal.clear();
         }
     }
-    private static void mergeFiles(Map<String,String> dosc, ArrayList <Participante> listaParticipantes, ArrayList <Directorio> listaDirectorio, String registroPDF, String lista_auto_pdf ) throws FileNotFoundException, IOException{
+    private static void mergeFiles(Map<String,String> dosc, ArrayList <Participante> listaParticipantes, ArrayList <Directorio> listaDirectorio, String registroPDF, String lista_auto_pdf, String chkDC5, String chkIFE, String chkSTPS, String registro_foto, String chkRegistrofoto ) throws FileNotFoundException, IOException{
+        
+        //chkDC5a,chkIFEa,chkSTPSa
         
         ArrayList <Directorio> listaDirecciones = new ArrayList <> ();
         
@@ -2060,6 +2147,15 @@ public class Cdiscisa {
             }
         }
         
+        //constanca  -- ya
+        //diploma  --- ya 
+        //dc3  -- ya 
+        //reporte fotografico --- variable (nuevo)
+        //lista autografa  -- ya 
+        //ife jorge -- nuevo -- ya
+        // registro stps -- nuevo -- ya
+        // dc5 -- nuevo -- ya 
+        // registro de proteccion civil --- ya 
         
         ListIterator <Directorio> itDireccionesConstancia = listaDirecciones.listIterator(); 
         while (itDireccionesConstancia.hasNext()){
@@ -2067,19 +2163,45 @@ public class Cdiscisa {
             PDFMergerUtility merge = new PDFMergerUtility();
             
             Directorio d = itDireccionesConstancia.next();
-            String x,name;
+            String dc5_name,name;
             name = "";
+            dc5_name ="";
             
-            SortedSet<String> keys = new TreeSet<String>(dosc.keySet());
+            //SortedSet<String> keys = new TreeSet<String>(dosc.keySet());
+            SortedSet<String> keys = new TreeSet<>(dosc.keySet());
             
             for (String key : keys) { 
             String value = dosc.get(key);
                 if (value.equalsIgnoreCase(d.determinante)) {
                    
                     if (key.contains("Diplomas_")){
-                        name = key.replaceFirst("Diplomas_", "Capacitacion_");
+                       // name = key.replaceFirst("Diplomas_", "Capacitacion_");  //REVISION2
+                       name = key.replaceFirst("Diplomas_", "");  //REVISION2                       
                     }
-                merge.addSource(new File(key));
+                    merge.addSource(new File(key));
+                   
+                    //REVISION2
+                    
+                    if (chkDC5.equalsIgnoreCase("true")){
+                        
+                    if (key.substring(key.length()-8).equalsIgnoreCase("_BYR.pdf")){
+                        dc5_name="DC5_BYR.pdf";
+                    }
+                    if (key.substring(key.length()-10).equalsIgnoreCase("_INC I.pdf")){
+                        dc5_name="DC5_INCENDIOS.pdf";
+                    }
+                    if (key.substring(key.length()-9).equalsIgnoreCase("_EVAC.pdf")){
+                        dc5_name="DC5_EVAC.pdf";
+                    }
+                    if (key.substring(key.length()-7).equalsIgnoreCase("_PA.pdf")){
+                        dc5_name="DC5_PAUX.pdf";
+                    }
+                    if (key.substring(key.length()-10).equalsIgnoreCase("_MULTI.pdf")){
+                        dc5_name="DC5_Multifuncional.pdf";
+                    }
+                    }
+                    //REVISION2
+                    
                 }
                 
             }
@@ -2101,7 +2223,28 @@ public class Cdiscisa {
             
             
             try{
+                // REVISION2 -- Registro fotografico:
+                if (chkRegistrofoto.equalsIgnoreCase("true") && !chkRegistrofoto.isEmpty() ){
+                    merge.addSource(new File(registro_foto));
+                }
+                // REVISION2 -- Lista Autografa:
                 merge.addSource(new File(lista_auto_pdf));
+               
+                 // REVISION2
+                if (chkIFE.equalsIgnoreCase("true")){
+                    // IFE de Jorge Razon
+                    merge.addSource(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/IFE_JorgeRazonGil.pdf"));
+                }
+                if (chkSTPS.equalsIgnoreCase("true")){
+                    // Registro STPS Jorge
+                    merge.addSource(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/REGISTRO_STPS_JORGE.pdf"));
+                }
+                if (chkDC5.equalsIgnoreCase("true")  && !dc5_name.isEmpty()){
+                    // Incluir DC 5 correspondiente al Tema.
+                    merge.addSource(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream("files/" + dc5_name));
+                }
+                  //REVISION2
+                
                 
                 if(registroPDF.equalsIgnoreCase("files/RegistroPCJorge Razon2016.pdf")){
                     merge.addSource(cdiscisa.Cdiscisa.class.getClassLoader().getResourceAsStream(registroPDF));
@@ -2112,7 +2255,7 @@ public class Cdiscisa {
                 merge.setDestinationFileName(name);
                 merge.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
             } catch (Exception ex){
-                JOptionPane.showMessageDialog(null, "registroPDF: " + registroPDF + "\nlista_auto_pdf: " + lista_auto_pdf + "\n" + ex.getMessage());
+                JOptionPane.showMessageDialog(null, "registroPDF: " + registroPDF + "\nlista autografa: " + lista_auto_pdf + "\nRegistro fotografico: " + "\n" + ex.getMessage());
             }
             
             //newReg = null;
